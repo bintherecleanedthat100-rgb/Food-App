@@ -1,0 +1,2040 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#faf8f5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#141210" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Making Food">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="icon" href="icons/icon-192.png">
+<title>Making Food</title>
+<style>
+:root {
+  --bg: #faf8f5;
+  --surface: #ffffff;
+  --surface-2: #f0ece6;
+  --text: #1d1b19;
+  --muted: #6c665f;
+  --line: #e4dfd8;
+  --accent: #b0502a;
+  --accent-text: #ffffff;
+  --danger: #b3261e;
+  --star: #c0820f;
+  --tile-text: #3b2f26;
+  --t1: #f3dccb; --t2: #dfe8d3; --t3: #d9e4ee; --t4: #efe0b9; --t5: #ead6e0; --t6: #d6e6e0;
+  --radius: 16px;
+  --gutter-l: calc(env(safe-area-inset-left) + 16px);
+  --gutter-r: calc(env(safe-area-inset-right) + 16px);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #141210;
+    --surface: #1f1c19;
+    --surface-2: #2b2723;
+    --text: #f2eee9;
+    --muted: #a59f98;
+    --line: #37322d;
+    --accent: #e3804f;
+    --accent-text: #1a0f08;
+    --danger: #f2867d;
+    --star: #f0b54a;
+    --tile-text: #f3e9df;
+    --t1: #4a3426; --t2: #34412c; --t3: #2c3a47; --t4: #4a3f22; --t5: #45303b; --t6: #2b403a;
+  }
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font: 17px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+body.locked { overflow: hidden; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; margin: 0; cursor: pointer; }
+input, textarea { font: inherit; color: inherit; }
+svg { display: block; }
+[hidden] { display: none !important; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* Main screen */
+.top {
+  position: sticky; top: 0; z-index: 5;
+  display: flex; justify-content: center;
+  padding: calc(env(safe-area-inset-top) + 10px) var(--gutter-r) 10px var(--gutter-l);
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  -webkit-backdrop-filter: saturate(1.6) blur(14px);
+  backdrop-filter: saturate(1.6) blur(14px);
+}
+.seg { display: flex; width: min(100%, 220px); padding: 3px; border-radius: 12px; background: var(--surface-2); }
+.seg button, .seg label { flex: 1; }
+.seg button, .seg span {
+  display: flex; align-items: center; justify-content: center;
+  min-height: 40px; border-radius: 9px;
+  font-size: 16px; font-weight: 600; color: var(--muted);
+}
+.seg button[aria-pressed="true"], .seg input:checked + span {
+  background: var(--surface); color: var(--text); box-shadow: 0 1px 3px rgba(0, 0, 0, .14);
+}
+.seg input { position: absolute; opacity: 0; pointer-events: none; }
+.seg input:focus-visible + span { outline: 2px solid var(--accent); }
+.menu-btn {
+  position: absolute; right: calc(env(safe-area-inset-right) + 6px); bottom: 8px;
+  width: 44px; height: 44px; display: grid; place-items: center; color: var(--muted);
+}
+.menu-btn svg { width: 22px; height: 22px; }
+
+.grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 18px 12px;
+  padding: 8px var(--gutter-r) calc(env(safe-area-inset-bottom) + 100px) var(--gutter-l);
+  max-width: 900px; margin: 0 auto;
+}
+.card { display: flex; flex-direction: column; gap: 8px; min-width: 0; text-align: left; }
+.card-media { aspect-ratio: 1; border-radius: var(--radius); overflow: hidden; background: var(--surface-2); transition: transform .15s; }
+.card:active .card-media { transform: scale(.97); }
+.card-media img { width: 100%; height: 100%; object-fit: cover; }
+.card-name {
+  font-size: 15px; font-weight: 600; line-height: 1.25;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.tile {
+  display: flex; align-items: center; justify-content: center; height: 100%;
+  padding: 14px; text-align: center; color: var(--tile-text); background: var(--tile);
+}
+.tile span {
+  font-size: 22px; font-weight: 700; line-height: 1.15; letter-spacing: -.01em; overflow-wrap: anywhere;
+  display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden;
+}
+.tile.long span { font-size: 18px; }
+.t1 { --tile: var(--t1); } .t2 { --tile: var(--t2); } .t3 { --tile: var(--t3); }
+.t4 { --tile: var(--t4); } .t5 { --tile: var(--t5); } .t6 { --tile: var(--t6); }
+.empty { text-align: center; color: var(--muted); padding: 48px 24px; margin: 0; }
+.fab {
+  position: fixed; z-index: 6;
+  right: calc(env(safe-area-inset-right) + 20px); bottom: calc(env(safe-area-inset-bottom) + 20px);
+  width: 60px; height: 60px; border-radius: 50%;
+  display: grid; place-items: center;
+  background: var(--accent); color: var(--accent-text);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, .25);
+}
+.fab svg { width: 28px; height: 28px; }
+
+/* Sheets */
+.sheet {
+  position: fixed; inset: 0; z-index: 20;
+  display: flex; flex-direction: column;
+  background: var(--bg);
+  transform: translateY(100%); visibility: hidden;
+  transition: transform .3s cubic-bezier(.2, .8, .2, 1), visibility 0s linear .3s;
+}
+.sheet.open { transform: none; visibility: visible; transition: transform .3s cubic-bezier(.2, .8, .2, 1); }
+.sheet.layer2 { z-index: 30; }
+@media (prefers-reduced-motion: reduce) { .sheet, .sheet.open { transition: none; } }
+.sheet-scroll { flex: 1; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+.bar {
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
+  padding: calc(env(safe-area-inset-top) + 6px) calc(env(safe-area-inset-right) + 6px) 6px calc(env(safe-area-inset-left) + 6px);
+  border-bottom: 1px solid var(--line);
+}
+.bar h2 { margin: 0; font-size: 17px; }
+.text-btn { min-height: 44px; padding: 0 10px; color: var(--accent); font-size: 17px; }
+.bar .text-btn:first-child { justify-self: start; }
+.bar .text-btn:last-child { justify-self: end; font-weight: 700; }
+.bottom-bar {
+  display: flex; gap: 12px;
+  padding: 12px var(--gutter-r) calc(env(safe-area-inset-bottom) + 12px) var(--gutter-l);
+  border-top: 1px solid var(--line); background: var(--bg);
+}
+.btn { flex: 1; min-height: 52px; border-radius: 14px; font-size: 17px; font-weight: 700; }
+.btn.primary { background: var(--accent); color: var(--accent-text); }
+.btn.secondary { background: var(--surface-2); }
+.btn.danger { width: 100%; margin-top: 12px; color: var(--danger); border: 1px solid var(--line); }
+
+/* Recipe view */
+.hero { position: relative; width: 100%; aspect-ratio: 4 / 3; max-height: 58vh; background: var(--surface-2); }
+.hero img { width: 100%; height: 100%; object-fit: cover; }
+.hero .tile span { font-size: 34px; }
+.close-btn {
+  position: absolute;
+  top: calc(env(safe-area-inset-top) + 12px); left: calc(env(safe-area-inset-left) + 12px);
+  width: 44px; height: 44px; border-radius: 50%;
+  display: grid; place-items: center;
+  background: rgba(0, 0, 0, .45); color: #fff;
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+}
+.close-btn svg { width: 22px; height: 22px; }
+.content { max-width: 720px; margin: 0 auto; padding: 20px calc(env(safe-area-inset-right) + 20px) 32px calc(env(safe-area-inset-left) + 20px); }
+.title { margin: 0 0 14px; font-size: 28px; line-height: 1.15; letter-spacing: -.02em; }
+.section { margin: 30px 0 8px; font-size: 20px; }
+.label { font-size: 14px; font-weight: 600; color: var(--muted); }
+.muted { color: var(--muted); }
+.small { font-size: 14px; }
+.prose { margin: 0; white-space: pre-wrap; }
+.last-time { margin: 0 0 16px; padding: 12px 14px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line); }
+.last-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.last-note { margin: 6px 0 0; }
+.stars { display: inline-flex; gap: 2px; color: var(--star); }
+.stars svg { width: 16px; height: 16px; }
+.off { opacity: .25; }
+.servings {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 6px 6px 6px 14px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line);
+}
+.stepper { display: flex; align-items: center; gap: 4px; }
+.stepper button { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; background: var(--surface-2); }
+.stepper button:disabled { opacity: .35; }
+.stepper svg { width: 20px; height: 20px; }
+.stepper output { min-width: 40px; text-align: center; font-size: 19px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.scaled-note { margin: 6px 0 0; }
+.checklist, .steps, .rows { list-style: none; margin: 0; padding: 0; }
+.check {
+  display: flex; align-items: flex-start; gap: 12px; width: 100%; min-height: 48px;
+  padding: 11px 0; text-align: left; border-bottom: 1px solid var(--line);
+}
+.box { flex: none; width: 24px; height: 24px; margin-top: 1px; border-radius: 7px; border: 2px solid var(--muted); display: grid; place-items: center; }
+.box svg { width: 16px; height: 16px; opacity: 0; }
+.check[aria-checked="true"] .box { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
+.check[aria-checked="true"] .box svg { opacity: 1; }
+.check[aria-checked="true"] .ing-text { color: var(--muted); text-decoration: line-through; }
+.qty { font-weight: 700; }
+.steps li { display: flex; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--line); }
+.num { flex: none; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: var(--surface-2); font-size: 15px; font-weight: 700; }
+.steps p { margin: 2px 0 0; }
+.timer { display: flex; align-items: center; gap: 6px; margin-top: 10px; }
+.timer-btn {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px;
+  border-radius: 22px; background: var(--surface-2); font-weight: 600; font-variant-numeric: tabular-nums;
+}
+.timer-btn svg { width: 18px; height: 18px; }
+.timer-btn.running { background: var(--accent); color: var(--accent-text); }
+.timer-btn.done { background: var(--text); color: var(--bg); }
+.timer-reset { min-height: 44px; padding: 0 12px; color: var(--muted); font-weight: 600; }
+.timeline {
+  display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x proximity;
+  margin: 0 calc(-20px - env(safe-area-inset-right)) 0 calc(-20px - env(safe-area-inset-left));
+  padding: 4px calc(env(safe-area-inset-right) + 20px) 8px calc(env(safe-area-inset-left) + 20px);
+}
+.log-item { flex: none; width: 168px; text-align: left; scroll-snap-align: start; }
+.log-media { aspect-ratio: 1; border-radius: 12px; overflow: hidden; background: var(--surface-2); margin-bottom: 8px; }
+.log-media img { width: 100%; height: 100%; object-fit: cover; }
+.log-media .tile span { font-size: 16px; }
+.log-meta { display: flex; align-items: center; justify-content: space-between; gap: 6px; font-size: 14px; }
+.log-change { margin: 4px 0 0; font-size: 14px; color: var(--muted); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+
+/* Forms */
+.form { padding: 16px var(--gutter-r) calc(env(safe-area-inset-bottom) + 40px) var(--gutter-l); max-width: 720px; margin: 0 auto; width: 100%; }
+.field { display: block; min-width: 0; margin: 0 0 22px; padding: 0; border: 0; }
+.field > span, .field > legend { display: block; margin-bottom: 6px; padding: 0; font-size: 14px; font-weight: 600; color: var(--muted); }
+.form input:not([type="radio"]):not([type="checkbox"]), .form textarea {
+  width: 100%; min-height: 44px; padding: 10px 12px;
+  border: 1px solid var(--line); border-radius: 12px; background: var(--surface);
+  font-size: 16px; /* 16px stops iOS from zooming into focused fields */
+}
+.form textarea { min-height: 88px; resize: vertical; }
+.form [aria-invalid="true"] { border-color: var(--danger) !important; }
+.form .seg { width: 100%; }
+.hint { margin: -2px 0 10px; font-size: 13px; color: var(--muted); }
+.rows { display: flex; flex-direction: column; gap: 8px; }
+.row { display: flex; align-items: flex-start; gap: 6px; background: var(--bg); }
+.row.dragging { position: relative; z-index: 1; border-radius: 12px; background: var(--surface); box-shadow: 0 6px 20px rgba(0, 0, 0, .2); }
+.drag, .del { flex: none; min-height: 44px; display: grid; place-items: center; color: var(--muted); }
+.drag { width: 30px; touch-action: none; cursor: grab; }
+.del { width: 36px; }
+.drag svg, .del svg { width: 20px; height: 20px; }
+.rows > .row { padding-bottom: 8px; border-bottom: 1px solid var(--line); }
+.ing-fields { flex: 1; min-width: 0; display: grid; grid-template-columns: 1fr 1fr; grid-template-areas: "name name" "amt unit"; gap: 6px; }
+.ing-fields .name { grid-area: name; }
+.ing-fields .amt { grid-area: amt; }
+.ing-fields .unit { grid-area: unit; }
+.step-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.step-head { display: flex; align-items: center; gap: 8px; }
+.form .step-main textarea { min-height: 72px; overflow: hidden; }
+.timer-field { display: flex; align-items: center; gap: 8px; font-size: 15px; color: var(--muted); }
+.form .timer-field input.min { flex: 0 0 96px; width: 96px; }
+.log-servings { margin: 0 0 22px; }
+.add-row { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; margin-top: 8px; color: var(--accent); font-weight: 600; }
+.add-row svg { width: 20px; height: 20px; }
+.versions { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+.versions li { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 52px; border-bottom: 1px solid var(--line); }
+.versions .text-btn { flex: none; font-weight: 600; }
+.log-photo { position: relative; aspect-ratio: 4 / 3; margin-bottom: 4px; border-radius: 16px; overflow: hidden; background: var(--surface-2); }
+.log-photo img { width: 100%; height: 100%; object-fit: cover; }
+.photo-placeholder { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: var(--muted); font-weight: 600; }
+.photo-placeholder svg { width: 36px; height: 36px; }
+.retake { display: block; margin: 0 0 18px; }
+.stars-input { display: flex; gap: 4px; color: var(--star); }
+.stars-input button { width: 52px; height: 52px; display: grid; place-items: center; }
+.stars-input svg { width: 36px; height: 36px; }
+.check-row { display: flex; align-items: center; gap: 12px; min-height: 48px; }
+.check-row input { width: 22px; height: 22px; accent-color: var(--accent); }
+
+/* Action sheet and toast */
+.action-backdrop {
+  position: fixed; inset: 0; z-index: 40;
+  display: flex; align-items: flex-end; justify-content: center;
+  padding: 0 8px calc(env(safe-area-inset-bottom) + 8px);
+  background: rgba(0, 0, 0, .4);
+}
+.action-panel { width: min(100%, 480px); display: flex; flex-direction: column; gap: 8px; }
+.action-list { border-radius: 14px; overflow: hidden; background: var(--surface); }
+.action-title { margin: 0; padding: 12px 16px; text-align: center; font-size: 13px; color: var(--muted); border-bottom: 1px solid var(--line); }
+.action-list button { display: block; width: 100%; min-height: 56px; font-size: 18px; color: var(--accent); }
+.action-list button + button { border-top: 1px solid var(--line); }
+.action-list .destructive { color: var(--danger); }
+.action-cancel { min-height: 56px; border-radius: 14px; background: var(--surface); color: var(--accent); font-size: 18px; font-weight: 700; }
+.toast {
+  position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom) + 96px); z-index: 50;
+  max-width: calc(100% - 32px); padding: 12px 18px; border-radius: 12px;
+  background: var(--text); color: var(--bg); font-size: 15px; font-weight: 600; text-align: center;
+  opacity: 0; transform: translate(-50%, 16px); pointer-events: none; transition: opacity .2s, transform .2s;
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="seg" role="group" aria-label="Category">
+    <button type="button" data-cat="chicken" aria-pressed="true">Chicken</button>
+    <button type="button" data-cat="beef" aria-pressed="false">Beef</button>
+  </div>
+  <button type="button" class="menu-btn" id="menuBtn" aria-label="More"></button>
+</header>
+<main id="grid" class="grid" aria-live="polite"></main>
+<p id="empty" class="empty" hidden></p>
+<button type="button" class="fab" id="addBtn" aria-label="Add recipe"></button>
+
+<section class="sheet" id="viewSheet" role="dialog" aria-modal="true" aria-label="Recipe" aria-hidden="true">
+  <div class="sheet-scroll" id="viewBody"></div>
+  <div class="bottom-bar">
+    <button type="button" class="btn secondary" id="editBtn">Edit</button>
+    <button type="button" class="btn primary" id="madeBtn">I made this</button>
+  </div>
+</section>
+
+<section class="sheet layer2" id="editSheet" role="dialog" aria-modal="true" aria-labelledby="editHeading" aria-hidden="true">
+  <div class="bar">
+    <button type="button" class="text-btn" id="cancelEdit">Cancel</button>
+    <h2 id="editHeading">Edit recipe</h2>
+    <button type="button" class="text-btn" id="saveEdit">Save</button>
+  </div>
+  <form class="sheet-scroll" id="editScroll" novalidate><div class="form" id="editForm"></div></form>
+</section>
+
+<section class="sheet layer2" id="logSheet" role="dialog" aria-modal="true" aria-labelledby="logHeading" aria-hidden="true">
+  <div class="bar">
+    <button type="button" class="text-btn" id="cancelLog">Cancel</button>
+    <h2 id="logHeading">I made this</h2>
+    <button type="button" class="text-btn" id="saveLog">Save</button>
+  </div>
+  <form class="sheet-scroll" novalidate><div class="form" id="logForm"></div></form>
+</section>
+
+<div class="action-backdrop" id="actionSheet" hidden>
+  <div class="action-panel" role="dialog" aria-modal="true">
+    <div class="action-list" id="actionList"></div>
+    <button type="button" class="action-cancel" id="actionCancel">Cancel</button>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<input type="file" id="cameraInput" accept="image/*" capture="environment" hidden>
+<input type="file" id="importInput" accept="application/json,.json" hidden>
+
+<script>
+'use strict';
+
+/* ---------- Seed recipes ---------- */
+
+const I = (amount, unit, name) => ({ amount, unit, name });
+const S = (text, minutes) => ({ text, timerSec: minutes ? Math.round(minutes * 60) : null });
+
+const SEED_RECIPES = [
+  {
+    id: 'chicken-shawarma-bowl',
+    title: 'Chicken Shawarma Bowl',
+    category: 'chicken',
+    baseServings: 4,
+    ingredients: [
+      I(3, 'lb', 'boneless skinless chicken thighs'),
+      I(1/4, 'cup', 'extra virgin olive oil'),
+      I(3, 'tbsp', 'fresh lemon juice'),
+      I(6, 'clove', 'garlic, minced'),
+      I(1, 'tbsp', 'ground cumin'),
+      I(1, 'tbsp', 'smoked paprika'),
+      I(2, 'tsp', 'ground coriander'),
+      I(1, 'tsp', 'ground turmeric'),
+      I(1/2, 'tsp', 'ground cinnamon'),
+      I(1/4, 'tsp', 'cayenne pepper'),
+      I(2, 'tsp', 'kosher salt'),
+      I(1, 'tsp', 'black pepper'),
+      I(2, 'cup', 'jasmine rice, uncooked'),
+      I(3, 'cup', 'chicken broth'),
+      I(1, 'tbsp', 'butter'),
+      I(1, '', 'English cucumber, diced'),
+      I(1, 'pint', 'cherry tomatoes, halved'),
+      I(1/2, '', 'red onion, thinly sliced'),
+      I(1/4, 'cup', 'fresh parsley, chopped'),
+      I(1, 'cup', 'plain whole-milk Greek yogurt (garlic sauce)'),
+      I(1, 'clove', 'garlic, finely grated (garlic sauce)'),
+      I(1, 'tbsp', 'fresh lemon juice (garlic sauce)'),
+      I(1/4, 'tsp', 'kosher salt (garlic sauce)'),
+    ],
+    steps: [
+      S('Whisk the olive oil, 3 tbsp lemon juice, minced garlic, cumin, paprika, coriander, turmeric, cinnamon, cayenne, salt, and pepper in a large bowl. Add the chicken and turn to coat. Cover and marinate in the fridge for at least 1 hour (up to 24 hours).', 60),
+      S('Rinse the rice until the water runs mostly clear. Bring the rice, broth, and butter to a boil in a saucepan, then cover, turn the heat to low, and simmer.', 15),
+      S('Take the rice off the heat and let it steam, still covered. Fluff with a fork.', 10),
+      S('Air fry the chicken at 380°F in a single layer (work in batches), flipping halfway, until the thickest piece reads 165°F inside.', 20),
+      S('Rest the chicken on a cutting board, then slice into strips.', 5),
+      S('Stir together the yogurt, grated garlic, 1 tbsp lemon juice, and 1/4 tsp salt for the garlic sauce.'),
+      S('Build bowls: rice, a generous pile of chicken, cucumber, tomatoes, red onion, and parsley. Spoon garlic sauce over the top.'),
+    ],
+    mealPrep: 'Divide the rice and chicken into 4 containers. Pack the cucumber, tomatoes, onion, and garlic sauce in separate small containers so they stay crisp and cold. Refrigerate up to 4 days. The cooked chicken and rice also freeze well for up to 3 months (leave out the vegetables and sauce).',
+    reheat: 'Air fry the chicken at 375°F for 4 to 6 minutes, shaking once, until hot throughout (165°F). Microwave the rice separately, covered, with a splash of water for 1 to 2 minutes. Add the cold toppings and sauce after reheating.',
+  },
+  {
+    id: 'chicken-burrito-bowl',
+    title: 'Chicken Burrito Bowl with Lime Crema',
+    category: 'chicken',
+    baseServings: 4,
+    ingredients: [
+      I(3, 'lb', 'boneless skinless chicken thighs'),
+      I(2, 'tbsp', 'avocado oil'),
+      I(2, 'tbsp', 'fresh lime juice'),
+      I(1, 'tbsp', 'chili powder'),
+      I(2, 'tsp', 'ground cumin'),
+      I(1, 'tsp', 'smoked paprika'),
+      I(1, 'tsp', 'dried oregano'),
+      I(1, 'tsp', 'garlic powder'),
+      I(1, 'tsp', 'onion powder'),
+      I(2, 'tsp', 'kosher salt'),
+      I(1/2, 'tsp', 'black pepper'),
+      I(2, 'cup', 'long-grain white rice, uncooked'),
+      I(3, 'cup', 'chicken broth'),
+      I(1, 'tbsp', 'butter'),
+      I(2, 'tbsp', 'fresh lime juice (for the rice)'),
+      I(1/2, 'cup', 'fresh cilantro, chopped, divided'),
+      I(1.5, 'cup', 'corn kernels (frozen, thawed)'),
+      I(1, 'tbsp', 'butter (for the corn)'),
+      I(3, '', 'Roma tomatoes, diced'),
+      I(1/2, '', 'white onion, finely diced'),
+      I(1, '', 'jalapeño, seeded and minced'),
+      I(2, '', 'avocados, sliced'),
+      I(1, 'cup', 'Monterey Jack cheese, shredded'),
+      I(2, 'cup', 'romaine lettuce, chopped'),
+      I(3/4, 'cup', 'sour cream (lime crema)'),
+      I(2, 'tbsp', 'fresh lime juice (lime crema)'),
+      I(1, 'tsp', 'lime zest (lime crema)'),
+      I(1, 'clove', 'garlic, finely grated (lime crema)'),
+      I(1/4, 'tsp', 'kosher salt (lime crema)'),
+    ],
+    steps: [
+      S('Mix the avocado oil, 2 tbsp lime juice, chili powder, cumin, paprika, oregano, garlic powder, onion powder, salt, and pepper. Coat the chicken and marinate in the fridge for at least 30 minutes.', 30),
+      S('Rinse the rice. Bring the rice, broth, and 1 tbsp butter to a boil, then cover, turn the heat to low, and simmer.', 15),
+      S('Take the rice off the heat and let it steam, covered. Fluff, then stir in 2 tbsp lime juice and half the cilantro.', 10),
+      S('Air fry the chicken at 380°F in a single layer (in batches), flipping halfway, until it reads 165°F inside.', 18),
+      S('Rest the chicken, then chop it into bite-size pieces.', 5),
+      S('Melt 1 tbsp butter in a skillet over medium-high heat and cook the corn, stirring now and then, until lightly charred.', 5),
+      S('Make the pico: combine the tomatoes, white onion, jalapeño, the rest of the cilantro, and a pinch of salt.'),
+      S('Whisk the sour cream, lime juice, lime zest, grated garlic, and salt for the lime crema. Thin with a teaspoon of water if you want it drizzly.'),
+      S('Build bowls: romaine, cilantro-lime rice, chicken, corn, pico, cheese, and avocado. Finish with lime crema.'),
+    ],
+    mealPrep: 'Pack the rice, chicken, and corn together. Keep the pico, lettuce, cheese, and lime crema in separate containers, and slice the avocado fresh the day you eat it. Refrigerate up to 4 days. The chicken and rice freeze well for up to 3 months.',
+    reheat: 'Air fry the chicken and corn at 375°F for 4 to 6 minutes, shaking once, until hot throughout (165°F). Microwave the rice separately, covered, with a splash of water. Add the cold toppings and crema after reheating.',
+  },
+  {
+    id: 'honey-garlic-teriyaki-chicken',
+    title: 'Honey Garlic Teriyaki Chicken',
+    category: 'chicken',
+    baseServings: 4,
+    ingredients: [
+      I(3, 'lb', 'boneless skinless chicken thighs, cut into 1 1/2-inch pieces'),
+      I(1, 'tbsp', 'avocado oil'),
+      I(1, 'tbsp', 'arrowroot powder (for coating)'),
+      I(1, 'tsp', 'kosher salt'),
+      I(1/2, 'tsp', 'black pepper'),
+      I(1/2, 'cup', 'soy sauce or tamari'),
+      I(1/3, 'cup', 'honey'),
+      I(1/4, 'cup', 'water'),
+      I(2, 'tbsp', 'rice vinegar'),
+      I(6, 'clove', 'garlic, minced'),
+      I(1, 'tbsp', 'fresh ginger, grated'),
+      I(1, 'tbsp', 'arrowroot powder (for the sauce)'),
+      I(2, 'tbsp', 'cold water (for the sauce)'),
+      I(2, 'cup', 'jasmine rice, uncooked'),
+      I(3, 'cup', 'water (for the rice)'),
+      I(1, 'lb', 'broccoli florets'),
+      I(1, 'tbsp', 'avocado oil (for the broccoli)'),
+      I(1/4, 'tsp', 'kosher salt (for the broccoli)'),
+      I(2, '', 'green onions, sliced'),
+      I(1, 'tbsp', 'toasted sesame seeds'),
+    ],
+    steps: [
+      S('Rinse the rice. Bring the rice and 3 cups water to a boil, then cover, turn the heat to low, and simmer.', 15),
+      S('Take the rice off the heat and let it steam, covered. Fluff with a fork.', 10),
+      S('Pat the chicken dry. Toss with 1 tbsp avocado oil, salt, pepper, and 1 tbsp arrowroot until evenly coated.'),
+      S('Air fry the chicken at 400°F in a single layer (in batches), shaking halfway, until browned and 165°F inside.', 14),
+      S('Toss the broccoli with avocado oil and salt. Air fry at 380°F, shaking once, until tender with crisp edges.', 8),
+      S('Simmer the soy sauce, honey, 1/4 cup water, rice vinegar, garlic, and ginger in a small saucepan over medium heat.', 3),
+      S('Stir the arrowroot into 2 tbsp cold water until smooth, then whisk it into the simmering sauce. Cook just until thick and glossy, then take it off the heat right away (arrowroot thins out if it boils too long).', 1.5),
+      S('Toss the chicken in the sauce. Serve over rice with the broccoli, green onions, and sesame seeds.'),
+    ],
+    mealPrep: 'Divide the rice, saucy chicken, and broccoli into 4 containers. For crispier chicken, keep some sauce in a small container and add it after reheating. Refrigerate up to 4 days, or freeze the chicken and rice for up to 3 months. The sauce may thin slightly in storage; that is normal with arrowroot.',
+    reheat: 'Air fry the chicken and broccoli at 375°F for 4 to 6 minutes, shaking once, until hot throughout (165°F). If the chicken is very saucy, use a small oven-safe dish in the basket. Microwave the rice separately, covered, with a splash of water.',
+  },
+  {
+    id: 'chipotle-chicken-fajita-bowl',
+    title: 'Chipotle Chicken Fajita Bowl with Homemade Queso',
+    category: 'chicken',
+    baseServings: 4,
+    ingredients: [
+      I(3, 'lb', 'boneless skinless chicken thighs'),
+      I(2, 'tbsp', 'avocado oil'),
+      I(2, 'tbsp', 'fresh lime juice'),
+      I(2, '', 'chipotle peppers in adobo, minced (check the label for seed oils)'),
+      I(1, 'tbsp', 'adobo sauce from the can'),
+      I(2, 'tsp', 'chili powder'),
+      I(2, 'tsp', 'ground cumin'),
+      I(1, 'tsp', 'smoked paprika'),
+      I(1, 'tsp', 'garlic powder'),
+      I(2, 'tsp', 'kosher salt'),
+      I(3, '', 'bell peppers (mixed colors), sliced'),
+      I(1, '', 'large yellow onion, sliced'),
+      I(1, 'tbsp', 'avocado oil (for the vegetables)'),
+      I(1/2, 'tsp', 'kosher salt (for the vegetables)'),
+      I(2, 'cup', 'long-grain white rice, uncooked'),
+      I(3, 'cup', 'chicken broth'),
+      I(1, 'tbsp', 'butter'),
+      I(2, 'tbsp', 'butter (queso)'),
+      I(1, 'tbsp', 'arrowroot powder (queso)'),
+      I(1, 'cup', 'whole milk (queso)'),
+      I(8, 'oz', 'sharp cheddar, freshly shredded (queso)'),
+      I(4, 'oz', 'Monterey Jack, freshly shredded (queso)'),
+      I(1, 'can', 'diced green chiles, 4 oz, drained (queso)'),
+      I(1/2, 'tsp', 'ground cumin (queso)'),
+      I(2, '', 'avocados, sliced'),
+      I(1/4, 'cup', 'fresh cilantro, chopped'),
+      I(1, '', 'lime, cut into wedges'),
+    ],
+    steps: [
+      S('Mix the avocado oil, lime juice, chipotles, adobo sauce, chili powder, cumin, paprika, garlic powder, and salt. Coat the chicken and marinate in the fridge for at least 30 minutes.', 30),
+      S('Rinse the rice. Bring the rice, broth, and 1 tbsp butter to a boil, then cover, turn the heat to low, and simmer.', 15),
+      S('Take the rice off the heat and let it steam, covered. Fluff with a fork.', 10),
+      S('Air fry the chicken at 380°F in a single layer (in batches), flipping halfway, until 165°F inside.', 18),
+      S('Rest the chicken, then slice into strips.', 5),
+      S('Toss the peppers and onion with avocado oil and salt. Air fry at 400°F, shaking halfway, until soft with charred edges.', 12),
+      S('Queso: whisk the arrowroot into the cold milk until smooth. Pour it into a saucepan with 2 tbsp butter over medium heat and stir until steaming and slightly thickened.', 4),
+      S('Turn the heat to low. Add the cheddar and Monterey Jack a handful at a time, stirring until each addition melts and the queso is smooth. Stir in the green chiles and cumin. Do not let it boil.'),
+      S('Build bowls: rice, chicken, peppers and onions, a ladle of queso, avocado, and cilantro, with lime wedges on the side.'),
+    ],
+    mealPrep: 'Pack the rice, chicken, and fajita vegetables together. Store the queso in its own container; it firms up in the fridge. Add avocado fresh. Refrigerate up to 4 days. The chicken, rice, and vegetables freeze well for up to 3 months; the queso does not freeze well.',
+    reheat: 'Air fry the chicken and vegetables at 375°F for 4 to 6 minutes, shaking once, until hot throughout (165°F). Microwave the rice separately, covered, with a splash of water. Warm the queso in the microwave in 20-second bursts, stirring each time and adding a splash of milk until smooth. The queso does not go in the air fryer.',
+  },
+  {
+    id: 'beef-bulgogi-bowl',
+    title: 'Beef Bulgogi Bowl with Kimchi',
+    category: 'beef',
+    baseServings: 4,
+    ingredients: [
+      I(3, 'lb', 'ribeye or sirloin, very thinly sliced'),
+      I(1/2, 'cup', 'soy sauce or tamari'),
+      I(1/2, '', 'Asian pear, grated (or 1 small apple)'),
+      I(2, 'tbsp', 'honey'),
+      I(6, 'clove', 'garlic, minced'),
+      I(1, 'tbsp', 'fresh ginger, grated'),
+      I(1, 'tbsp', 'rice vinegar'),
+      I(1, 'tsp', 'gochugaru (Korean chili flakes), optional'),
+      I(1, 'tsp', 'black pepper'),
+      I(4, '', 'green onions, sliced, divided'),
+      I(1, 'tbsp', 'avocado oil or beef tallow, for searing'),
+      I(2, 'cup', 'short-grain white rice, uncooked'),
+      I(2.5, 'cup', 'water (for the rice)'),
+      I(1, '', 'English cucumber, thinly sliced'),
+      I(2, 'tbsp', 'rice vinegar (for the cucumber)'),
+      I(1, 'tsp', 'honey (for the cucumber)'),
+      I(1/2, 'tsp', 'kosher salt (for the cucumber)'),
+      I(1.5, 'cup', 'kimchi'),
+      I(4, '', 'large eggs (optional)'),
+      I(1, 'tbsp', 'butter (for the eggs)'),
+      I(1, 'tbsp', 'toasted sesame seeds'),
+    ],
+    steps: [
+      S('If slicing the beef yourself, freeze it until firm at the edges so you can cut it paper-thin against the grain.', 30),
+      S('Whisk the soy sauce, grated pear, honey, garlic, ginger, rice vinegar, gochugaru, pepper, and half the green onions. Add the beef, toss, and marinate in the fridge for at least 30 minutes (up to overnight).', 30),
+      S('Rinse the rice. Bring the rice and 2 1/2 cups water to a boil, then cover, turn the heat to low, and simmer.', 15),
+      S('Take the rice off the heat and let it steam, covered. Fluff with a fork.', 10),
+      S('Toss the cucumber with 2 tbsp rice vinegar, 1 tsp honey, and 1/2 tsp salt. Let it quick-pickle while you cook.', 15),
+      S('Heat a cast iron skillet over high heat with a little avocado oil or tallow. Sear the beef in a single layer, letting it caramelize, until browned and cooked through. Repeat in batches with the rest of the beef.', 3),
+      S('Fry the eggs in butter until the whites are set and the edges are crisp.', 3),
+      S('Build bowls: rice, a big pile of bulgogi, pickled cucumber, kimchi, and a fried egg. Top with the remaining green onions and sesame seeds.'),
+    ],
+    mealPrep: 'Pack the rice and beef together. Keep the kimchi and pickled cucumber in separate containers so the rice does not get soggy. Fry eggs fresh, or skip them for meal prep. Refrigerate up to 4 days. Cooked bulgogi and rice freeze for up to 3 months. Raw marinated beef can also be frozen flat in a bag for up to 3 months; thaw it overnight in the fridge before cooking.',
+    reheat: 'Air fry the beef at 350°F for 3 to 4 minutes, shaking once, until hot throughout (165°F). Spread it out so the thin slices heat evenly without drying out. Microwave the rice separately, covered, with a splash of water. Serve the kimchi and cucumber cold.',
+  },
+  {
+    id: 'steak-sweet-potato-chimichurri',
+    title: 'Steak and Sweet Potato Chimichurri',
+    category: 'beef',
+    baseServings: 4,
+    ingredients: [
+      I(3, 'lb', 'sirloin or ribeye steaks, 1 to 1 1/4 inches thick'),
+      I(2, 'tsp', 'kosher salt'),
+      I(1, 'tsp', 'black pepper'),
+      I(1, 'tsp', 'garlic powder'),
+      I(1, 'tbsp', 'avocado oil or beef tallow'),
+      I(2, 'tbsp', 'butter'),
+      I(2.5, 'lb', 'sweet potatoes (about 3 large), cut into 1-inch cubes'),
+      I(2, 'tbsp', 'avocado oil (for the sweet potatoes)'),
+      I(1, 'tsp', 'kosher salt (for the sweet potatoes)'),
+      I(1, 'tsp', 'smoked paprika'),
+      I(1/2, 'tsp', 'garlic powder (for the sweet potatoes)'),
+      I(1, 'cup', 'fresh flat-leaf parsley, finely chopped (chimichurri)'),
+      I(2, 'tbsp', 'fresh oregano, finely chopped, or 2 tsp dried (chimichurri)'),
+      I(4, 'clove', 'garlic, minced (chimichurri)'),
+      I(1/2, 'cup', 'extra virgin olive oil (chimichurri)'),
+      I(3, 'tbsp', 'red wine vinegar (chimichurri)'),
+      I(1/2, 'tsp', 'red pepper flakes (chimichurri)'),
+      I(1/2, 'tsp', 'kosher salt (chimichurri)'),
+      I(1/4, 'tsp', 'black pepper (chimichurri)'),
+    ],
+    steps: [
+      S('Pat the steaks dry and season all over with salt, pepper, and garlic powder. Let them sit at room temperature so the salt soaks in and they sear evenly.', 30),
+      S('Make the chimichurri: stir together the parsley, oregano, garlic, olive oil, red wine vinegar, red pepper flakes, salt, and pepper. Let it sit so the flavors come together.', 20),
+      S('Toss the sweet potatoes with avocado oil, salt, smoked paprika, and garlic powder. Air fry at 400°F, shaking halfway, until tender inside and caramelized on the edges.', 20),
+      S('Heat a cast iron skillet over high heat until it just starts to smoke. Add the avocado oil or tallow and sear the steaks on the first side without moving them.', 4),
+      S('Flip the steaks, add the butter, and baste with the foaming butter. Cook until they reach 130°F for medium-rare or 145°F for the USDA-recommended minimum, about 3 to 5 minutes for 1-inch steaks.', 4),
+      S('Rest the steaks on a board. The temperature will rise a few more degrees.', 10),
+      S('Slice against the grain. Serve with the sweet potatoes and plenty of chimichurri spooned over the top.'),
+    ],
+    mealPrep: 'Pack the steak with the sweet potatoes. For the best texture, store the steak in larger pieces and slice it after reheating. Keep the chimichurri in a separate small container. Refrigerate everything up to 4 days.',
+    reheat: 'Air fry the sweet potatoes at 375°F for 5 to 6 minutes, shaking once. Air fry the steak separately at 350°F for 3 to 4 minutes so it does not dry out. USDA guidance is to reheat leftovers to 165°F, which will take the steak past medium-rare. Spoon the chimichurri on cold after reheating.',
+  },
+  {
+    id: 'thai-basil-beef',
+    title: 'Thai Basil Beef',
+    category: 'beef',
+    baseServings: 4,
+    ingredients: [
+      I(3, 'lb', 'ground beef (85/15)'),
+      I(1, 'tbsp', 'avocado oil'),
+      I(8, 'clove', 'garlic, minced'),
+      I(4, '', 'Thai chilies, thinly sliced (use fewer for less heat)'),
+      I(1, '', 'large shallot, thinly sliced'),
+      I(1, '', 'red bell pepper, thinly sliced'),
+      I(3, 'tbsp', 'soy sauce or tamari'),
+      I(2, 'tbsp', 'fish sauce'),
+      I(1, 'tbsp', 'honey'),
+      I(1, 'tbsp', 'fresh lime juice'),
+      I(2, 'tbsp', 'water'),
+      I(2, 'cup', 'Thai basil leaves, loosely packed (or Italian basil)'),
+      I(2, 'cup', 'jasmine rice, uncooked'),
+      I(3, 'cup', 'water (for the rice)'),
+      I(4, '', 'large eggs'),
+      I(2, 'tbsp', 'ghee (for the eggs)'),
+    ],
+    steps: [
+      S('Rinse the rice. Bring the rice and 3 cups water to a boil, then cover, turn the heat to low, and simmer.', 15),
+      S('Take the rice off the heat and let it steam, covered. Fluff with a fork.', 10),
+      S('Stir together the soy sauce, fish sauce, honey, lime juice, and 2 tbsp water.'),
+      S('Brown the ground beef in a large skillet over high heat, breaking it up, until no pink remains and it reads 160°F. Spoon off extra fat if you like.', 9),
+      S('Push the beef to one side. Add the avocado oil, garlic, chilies, and shallot to the empty side and stir until fragrant.', 1),
+      S('Add the bell pepper and cook until just tender-crisp, then stir everything together.', 2),
+      S('Pour in the sauce and toss until the beef is glossy and most of the liquid is absorbed. Turn off the heat and fold in the basil until it wilts.', 2),
+      S('Fry the eggs in hot ghee, spooning the ghee over the whites, until the edges are crisp and the yolks are as runny as you like.', 3),
+      S('Serve the beef over rice with a fried egg on top.'),
+    ],
+    mealPrep: 'Pack the rice and beef together. Fry eggs fresh when you eat, or hard-boil some ahead for meal prep. Refrigerate up to 4 days. The beef and rice freeze well for up to 3 months. The basil darkens in storage; stir in a few fresh leaves after reheating if you have them.',
+    reheat: 'Air fry the beef at 350°F for 4 to 5 minutes in a small oven-safe dish or foil-lined basket so the crumbles do not fall through, stirring once, until hot throughout (165°F). Microwave the rice separately, covered, with a splash of water.',
+  },
+  {
+    id: 'steak-bites-potato-hash',
+    title: 'Steak Bites and Potato Hash',
+    category: 'beef',
+    baseServings: 4,
+    ingredients: [
+      I(3, 'lb', 'sirloin steak, cut into 1-inch cubes'),
+      I(2, 'tsp', 'kosher salt'),
+      I(1, 'tsp', 'black pepper'),
+      I(1, 'tbsp', 'avocado oil or beef tallow'),
+      I(4, 'tbsp', 'butter'),
+      I(6, 'clove', 'garlic, minced'),
+      I(1, 'tbsp', 'fresh thyme leaves (or 1 tsp dried)'),
+      I(2, 'tbsp', 'fresh parsley, chopped'),
+      I(2, 'lb', 'Yukon Gold potatoes, cut into 3/4-inch cubes'),
+      I(1, 'tbsp', 'avocado oil (for the potatoes)'),
+      I(1, 'tsp', 'kosher salt (for the potatoes)'),
+      I(1, 'tsp', 'smoked paprika'),
+      I(1/2, 'tsp', 'garlic powder'),
+      I(1, '', 'yellow onion, diced'),
+      I(1, '', 'green bell pepper, diced'),
+      I(1, 'tbsp', 'butter (for the onion and pepper)'),
+    ],
+    steps: [
+      S('Pat the steak cubes dry and season with salt and pepper. Let them sit while you start the potatoes.', 20),
+      S('Toss the potatoes with avocado oil, salt, smoked paprika, and garlic powder. Air fry at 400°F, shaking every 5 minutes, until golden and crisp.', 20),
+      S('Melt 1 tbsp butter in a large skillet over medium heat. Cook the onion and bell pepper, stirring, until soft and lightly browned. Stir in the potatoes and move the hash to a platter.', 7),
+      S('Wipe out the skillet and heat it over high heat with the avocado oil or tallow. Sear the steak in a single layer, in batches, turning once, until browned outside. Pull at 130°F to 135°F for medium-rare or 145°F for the USDA-recommended minimum.', 3),
+      S('Turn the heat to medium. Return all the steak to the pan with the 4 tbsp butter, garlic, and thyme, and toss until the garlic is fragrant and the steak is coated.', 1),
+      S('Sprinkle with parsley and serve the steak bites over the potato hash with the garlic butter poured on top.'),
+    ],
+    mealPrep: 'Pack the steak bites on top of the hash with the pan butter spooned over. Refrigerate up to 4 days, or freeze for up to 3 months.',
+    reheat: 'Air fry the potato hash at 375°F for 5 to 6 minutes, shaking once, until crisp again. Air fry the steak bites separately at 350°F for 3 to 4 minutes so they do not dry out. USDA guidance is to reheat leftovers to 165°F, which will take the steak past medium-rare.',
+  },
+  {
+    id: 'meatballs-mashed-potatoes-gravy',
+    title: 'Meatballs with Mashed Potatoes and Gravy',
+    category: 'beef',
+    baseServings: 4,
+    ingredients: [
+      I(3, 'lb', 'ground beef (85/15)'),
+      I(2, '', 'large eggs'),
+      I(3/4, 'cup', 'Parmesan, finely grated'),
+      I(1/2, 'cup', 'almond flour (binder in place of breadcrumbs)'),
+      I(1/2, '', 'yellow onion, finely grated'),
+      I(4, 'clove', 'garlic, minced'),
+      I(2, 'tbsp', 'fresh parsley, chopped'),
+      I(2, 'tsp', 'kosher salt'),
+      I(1, 'tsp', 'black pepper'),
+      I(1/4, 'tsp', 'ground allspice'),
+      I(1/4, 'tsp', 'ground nutmeg'),
+      I(3, 'lb', 'Yukon Gold potatoes, peeled and cut into 2-inch chunks'),
+      I(6, 'tbsp', 'butter (mashed potatoes)'),
+      I(3/4, 'cup', 'whole milk, warmed (mashed potatoes)'),
+      I(1/2, 'cup', 'sour cream (mashed potatoes)'),
+      I(1.5, 'tsp', 'kosher salt (mashed potatoes)'),
+      I(1/2, 'tsp', 'black pepper (mashed potatoes)'),
+      I(3, 'tbsp', 'butter (gravy)'),
+      I(3, 'cup', 'beef broth (gravy)'),
+      I(1, 'tbsp', 'Worcestershire sauce (gravy)'),
+      I(2, 'tbsp', 'arrowroot powder (gravy)'),
+      I(1/4, 'cup', 'cold water (gravy)'),
+      I(1/2, 'cup', 'heavy cream (gravy)'),
+    ],
+    steps: [
+      S('Gently mix the beef, eggs, Parmesan, almond flour, onion, garlic, parsley, salt, pepper, allspice, and nutmeg with your hands until just combined; overmixing makes tough meatballs. Roll into 1 1/2-inch balls (about 40).'),
+      S('Air fry the meatballs at 380°F in a single layer (in batches), shaking halfway, until browned and 160°F inside.', 11),
+      S('Meanwhile, cover the potatoes with cold water by an inch, add a big pinch of salt, and bring to a boil. Simmer until a knife slides through easily.', 16),
+      S('Drain the potatoes and let them steam-dry in the pot off the heat. Mash with the butter, warm milk, sour cream, salt, and pepper until smooth.', 2),
+      S('Gravy: melt the butter in a large skillet over medium heat. Add the beef broth and Worcestershire, scraping up any browned bits, and simmer.', 5),
+      S('Stir the arrowroot into 1/4 cup cold water until smooth. Whisk it into the simmering broth and cook just until thickened, then lower the heat (arrowroot thins out if it boils too long). Stir in the cream and season with salt and pepper.', 1.5),
+      S('Add the meatballs to the gravy and turn them gently to coat over low heat.', 3),
+      S('Serve the meatballs and gravy over a big scoop of mashed potatoes.'),
+    ],
+    mealPrep: 'Pack the meatballs in gravy next to the mashed potatoes, or keep the gravy separate if you plan to air fry the meatballs. Refrigerate up to 4 days. The meatballs freeze well, with or without gravy, for up to 3 months. Mashed potatoes freeze too but come back a little softer.',
+    reheat: 'Air fry the meatballs at 350°F for 6 to 8 minutes, shaking once, until hot in the center (165°F). Microwave the mashed potatoes, covered, with a splash of milk, stirring halfway. Warm the gravy in the microwave or a small pan, whisking in a splash of broth if it has thickened.',
+  },
+  {
+    id: 'chipotle-beef-fajita-bowl',
+    title: 'Chipotle Beef Fajita Bowl with Homemade Queso',
+    category: 'beef',
+    baseServings: 4,
+    ingredients: [
+      I(3, 'lb', 'flank or skirt steak'),
+      I(2, 'tbsp', 'avocado oil'),
+      I(2, 'tbsp', 'fresh lime juice'),
+      I(2, '', 'chipotle peppers in adobo, minced (check the label for seed oils)'),
+      I(1, 'tbsp', 'adobo sauce from the can'),
+      I(2, 'tsp', 'chili powder'),
+      I(2, 'tsp', 'ground cumin'),
+      I(1, 'tsp', 'smoked paprika'),
+      I(1, 'tsp', 'garlic powder'),
+      I(2, 'tsp', 'kosher salt'),
+      I(1, 'tbsp', 'avocado oil or beef tallow, for searing'),
+      I(3, '', 'bell peppers (mixed colors), sliced'),
+      I(1, '', 'large yellow onion, sliced'),
+      I(1, 'tbsp', 'avocado oil (for the vegetables)'),
+      I(1/2, 'tsp', 'kosher salt (for the vegetables)'),
+      I(2, 'cup', 'long-grain white rice, uncooked'),
+      I(3, 'cup', 'beef or chicken broth'),
+      I(1, 'tbsp', 'butter'),
+      I(2, 'tbsp', 'butter (queso)'),
+      I(1, 'tbsp', 'arrowroot powder (queso)'),
+      I(1, 'cup', 'whole milk (queso)'),
+      I(8, 'oz', 'sharp cheddar, freshly shredded (queso)'),
+      I(4, 'oz', 'Monterey Jack, freshly shredded (queso)'),
+      I(1, 'can', 'diced green chiles, 4 oz, drained (queso)'),
+      I(1/2, 'tsp', 'ground cumin (queso)'),
+      I(2, '', 'avocados, sliced'),
+      I(1/4, 'cup', 'fresh cilantro, chopped'),
+      I(1, '', 'lime, cut into wedges'),
+    ],
+    steps: [
+      S('Mix the 2 tbsp avocado oil, lime juice, chipotles, adobo sauce, chili powder, cumin, paprika, garlic powder, and salt. Coat the steak and marinate in the fridge for at least 1 hour (up to overnight).', 60),
+      S('Rinse the rice. Bring the rice, broth, and 1 tbsp butter to a boil, then cover, turn the heat to low, and simmer.', 15),
+      S('Take the rice off the heat and let it steam, covered. Fluff with a fork.', 10),
+      S('Heat a cast iron skillet over high heat with the avocado oil or tallow. Wipe the excess marinade off the steak and sear the first side without moving it.', 4),
+      S('Flip and sear the second side until it reaches 130°F to 135°F for medium-rare or 145°F for the USDA-recommended minimum.', 4),
+      S('Rest the steak on a board, then slice thinly against the grain.', 10),
+      S('In the same skillet over medium-high heat, add 1 tbsp avocado oil and cook the peppers and onion with the salt, stirring, until soft with charred edges.', 8),
+      S('Queso: whisk the arrowroot into the cold milk until smooth. Pour it into a saucepan with 2 tbsp butter over medium heat and stir until steaming and slightly thickened.', 4),
+      S('Turn the heat to low. Add the cheddar and Monterey Jack a handful at a time, stirring until each addition melts and the queso is smooth. Stir in the green chiles and cumin. Do not let it boil.'),
+      S('Build bowls: rice, sliced steak, peppers and onions, a ladle of queso, avocado, and cilantro, with lime wedges on the side.'),
+    ],
+    mealPrep: 'Pack the rice, sliced steak, and fajita vegetables together. Store the queso in its own container; it firms up in the fridge. Add avocado fresh. Refrigerate up to 4 days. The steak, rice, and vegetables freeze for up to 3 months; the queso does not freeze well.',
+    reheat: 'Air fry the steak and vegetables at 350°F for 3 to 4 minutes, shaking once, until hot throughout. USDA guidance is to reheat leftovers to 165°F, which will take the steak past medium-rare. Microwave the rice separately, covered, with a splash of water. Warm the queso in the microwave in 20-second bursts, stirring each time and adding a splash of milk until smooth.',
+  },
+  {
+    id: 'greek-beef-bowl',
+    title: 'Greek Beef Bowl with Tzatziki',
+    category: 'beef',
+    baseServings: 4,
+    ingredients: [
+      I(3, 'lb', 'ground beef (85/15)'),
+      I(1/2, '', 'red onion, finely grated (kofta)'),
+      I(4, 'clove', 'garlic, minced (kofta)'),
+      I(1/4, 'cup', 'fresh parsley, chopped'),
+      I(1, 'tbsp', 'dried oregano'),
+      I(2, 'tsp', 'ground cumin'),
+      I(1, 'tsp', 'smoked paprika'),
+      I(1, 'tsp', 'lemon zest'),
+      I(2, 'tsp', 'kosher salt'),
+      I(1, 'tsp', 'black pepper'),
+      I(2, 'cup', 'long-grain white rice, uncooked'),
+      I(3, 'cup', 'chicken broth'),
+      I(1, 'tbsp', 'butter'),
+      I(2, 'tbsp', 'fresh lemon juice (for the rice)'),
+      I(1, 'tsp', 'dried oregano (for the rice)'),
+      I(1.5, 'cup', 'plain whole-milk Greek yogurt (tzatziki)'),
+      I(1/2, '', 'English cucumber, grated (tzatziki)'),
+      I(2, 'clove', 'garlic, finely grated (tzatziki)'),
+      I(1, 'tbsp', 'fresh lemon juice (tzatziki)'),
+      I(1, 'tbsp', 'extra virgin olive oil (tzatziki)'),
+      I(2, 'tbsp', 'fresh dill, chopped (tzatziki)'),
+      I(1/2, 'tsp', 'kosher salt (tzatziki)'),
+      I(1/2, '', 'English cucumber, diced (salad)'),
+      I(1, 'pint', 'cherry tomatoes, halved (salad)'),
+      I(1/2, '', 'red onion, thinly sliced (salad)'),
+      I(1/2, 'cup', 'kalamata olives, halved (salad)'),
+      I(1, 'tbsp', 'extra virgin olive oil (salad)'),
+      I(1, 'tbsp', 'red wine vinegar (salad)'),
+      I(4, 'oz', 'feta, crumbled'),
+    ],
+    steps: [
+      S('Grate the cucumber for the tzatziki, toss it with a pinch of salt, and let it drain in a strainer.', 10),
+      S('Squeeze the grated cucumber dry in a towel. Stir it into the yogurt with the garlic, lemon juice, olive oil, dill, and salt. Chill so the flavors come together.', 30),
+      S('Rinse the rice. Bring the rice, broth, butter, and 1 tsp oregano to a boil, then cover, turn the heat to low, and simmer.', 15),
+      S('Take the rice off the heat and let it steam, covered. Fluff and stir in the lemon juice.', 10),
+      S('Mix the beef, grated red onion, garlic, parsley, oregano, cumin, paprika, lemon zest, salt, and pepper with your hands until just combined. Shape into 12 oblong kofta about 1 inch thick.'),
+      S('Air fry the kofta at 380°F in a single layer (in batches), flipping halfway, until browned and 160°F inside.', 13),
+      S('Toss the diced cucumber, tomatoes, sliced red onion, and olives with the olive oil and red wine vinegar.'),
+      S('Build bowls: lemon rice, kofta, salad, feta, and a big spoonful of tzatziki.'),
+    ],
+    mealPrep: 'Pack the rice and kofta together. Keep the salad, feta, and tzatziki in separate containers. If liquid collects on top of the tzatziki, pour it off and stir. Refrigerate everything up to 4 days. The kofta and rice freeze for up to 3 months.',
+    reheat: 'Air fry the kofta at 350°F for 5 to 6 minutes, flipping once, until hot in the center (165°F). Microwave the rice separately, covered, with a splash of water. Serve the salad and tzatziki cold.',
+  },
+];
+
+/* ---------- Icons ---------- */
+
+const svg = (body, attrs = 'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"') =>
+  `<svg viewBox="0 0 24 24" aria-hidden="true" ${attrs}>${body}</svg>`;
+const ICONS = {
+  close: svg('<path d="M6 6l12 12M18 6L6 18"/>'),
+  plus: svg('<path d="M12 5v14M5 12h14"/>'),
+  minus: svg('<path d="M5 12h14"/>'),
+  more: svg('<circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/>', 'fill="currentColor"'),
+  check: svg('<path d="M5 12.5l4.5 4.5L19 7.5"/>', 'fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"'),
+  grip: svg('<circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/>', 'fill="currentColor"'),
+  camera: svg('<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>'),
+  clock: svg('<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>'),
+  play: svg('<path d="M8 5.5v13l10.5-6.5z"/>', 'fill="currentColor"'),
+  pause: svg('<path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/>', 'fill="currentColor"'),
+  star: svg('<path d="M12 2.8l2.85 5.9 6.45.9-4.7 4.5 1.15 6.4L12 17.4l-5.75 3.1 1.15-6.4-4.7-4.5 6.45-.9z"/>', 'fill="currentColor"'),
+};
+
+/* ---------- Small helpers ---------- */
+
+const CATEGORIES = ['chicken', 'beef'];
+const $ = (sel, root = document) => root.querySelector(sel);
+const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+
+function esc(value) {
+  return String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+}
+
+function uid(prefix) {
+  const random = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2);
+  return `${prefix}-${random}`;
+}
+
+function todayISO() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function formatDate(iso) {
+  const [y, m, d] = iso.split('-').map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+let toastTimer;
+function toast(message) {
+  const el = $('#toast');
+  el.textContent = message;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2600);
+}
+
+/* ---------- Amounts ---------- */
+
+// Scaled amounts are shown as the nearest kitchen fraction so "0.6667 cup" reads as "2/3 cup".
+const DISPLAY_FRACTIONS = [[0, ''], [1/8, '⅛'], [1/4, '¼'], [1/3, '⅓'], [3/8, '⅜'], [1/2, '½'], [5/8, '⅝'], [2/3, '⅔'], [3/4, '¾'], [7/8, '⅞'], [1, '']];
+const EDIT_FRACTIONS = [[1/8, '1/8'], [1/4, '1/4'], [1/3, '1/3'], [3/8, '3/8'], [1/2, '1/2'], [5/8, '5/8'], [2/3, '2/3'], [3/4, '3/4'], [7/8, '7/8']];
+
+function formatAmount(n) {
+  if (n == null || !(n > 0)) return '';
+  let whole = Math.floor(n);
+  const frac = n - whole;
+  let best = DISPLAY_FRACTIONS[0];
+  for (const f of DISPLAY_FRACTIONS) if (Math.abs(frac - f[0]) < Math.abs(frac - best[0])) best = f;
+  if (Math.abs(frac - best[0]) > 0.04) return String(Math.round(n * 100) / 100);
+  if (best[0] === 1) { whole += 1; best = DISPLAY_FRACTIONS[0]; }
+  if (whole === 0 && !best[1]) return String(Math.round(n * 100) / 100);
+  return `${whole || ''}${best[1]}`;
+}
+
+// The edit form shows exact values so that saving without changes never alters an amount.
+function formatAmountForEdit(n) {
+  if (n == null) return '';
+  const whole = Math.floor(n);
+  const frac = n - whole;
+  if (frac < 1e-9) return String(whole);
+  const f = EDIT_FRACTIONS.find(([v]) => Math.abs(v - frac) < 1e-9);
+  if (f) return whole ? `${whole} ${f[1]}` : f[1];
+  return String(n);
+}
+
+// Returns a positive number, null for blank or zero ("to taste"), or NaN when unreadable.
+function parseAmount(text) {
+  const t = text.trim();
+  if (!t) return null;
+  let m;
+  let value = NaN;
+  if ((m = t.match(/^(\d+)\s+(\d+)\/(\d+)$/))) value = Number(m[3]) ? Number(m[1]) + Number(m[2]) / Number(m[3]) : NaN;
+  else if ((m = t.match(/^(\d+)\/(\d+)$/))) value = Number(m[2]) ? Number(m[1]) / Number(m[2]) : NaN;
+  else if (/^(\d+\.?\d*|\.\d+)$/.test(t)) value = Number(t);
+  return value === 0 ? null : value;
+}
+
+const PLURAL_UNITS = { cup: 'cups', clove: 'cloves', can: 'cans', pint: 'pints', sprig: 'sprigs', stalk: 'stalks', bunch: 'bunches', head: 'heads', slice: 'slices' };
+
+function ingredientParts(ing, scale) {
+  const amount = ing.amount == null ? null : ing.amount * scale;
+  const qty = [formatAmount(amount), amount > 1 && PLURAL_UNITS[ing.unit] ? PLURAL_UNITS[ing.unit] : ing.unit].filter(Boolean).join(' ');
+  return { qty, name: ing.name };
+}
+
+function formatDuration(ms) {
+  const total = Math.ceil(ms / 1000);
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const s = total % 60;
+  return h ? `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}` : `${m}:${String(s).padStart(2, '0')}`;
+}
+
+function minutesForEdit(sec) {
+  return sec ? String(Math.round((sec / 60) * 100) / 100) : '';
+}
+
+/* ---------- Data model ---------- */
+
+const str = v => (typeof v === 'string' ? v : '');
+const list = v => (Array.isArray(v) ? v : []);
+const posInt = (v, fallback) => {
+  const n = Math.round(Number(v));
+  return Number.isFinite(n) && n >= 1 ? n : fallback;
+};
+
+function normalizeFields(src) {
+  if (!src || typeof src !== 'object') throw new Error('a recipe version is damaged.');
+  if (!CATEGORIES.includes(src.category)) throw new Error(`unknown category "${src.category}".`);
+  return {
+    title: str(src.title).trim() || 'Untitled recipe',
+    category: src.category,
+    baseServings: posInt(src.baseServings, 4),
+    ingredients: list(src.ingredients)
+      .map(i => ({ amount: Number(i?.amount) > 0 ? Number(i.amount) : null, unit: str(i?.unit).trim(), name: str(i?.name).trim() }))
+      .filter(i => i.name),
+    steps: list(src.steps)
+      .map(s => ({ text: str(s?.text).trim(), timerSec: Number(s?.timerSec) > 0 ? Math.round(Number(s.timerSec)) : null }))
+      .filter(s => s.text),
+    mealPrep: str(src.mealPrep).trim(),
+    reheat: str(src.reheat).trim(),
+    notes: str(src.notes).trim(),
+  };
+}
+
+function normalizeRecipe(r) {
+  if (!r || typeof r !== 'object') throw new Error('a recipe in the file is damaged.');
+  if (typeof r.id !== 'string' || !r.id) throw new Error('a recipe in the file has no id.');
+  const fields = normalizeFields(r);
+  return {
+    id: r.id,
+    ...fields,
+    coverPhotoId: str(r.coverPhotoId) || null,
+    versions: list(r.versions).map(v => ({ replacedAt: str(v?.replacedAt), snapshot: normalizeFields(v?.snapshot) })),
+    cookLog: list(r.cookLog).map(e => ({
+      id: str(e?.id) || uid('c'),
+      date: /^\d{4}-\d{2}-\d{2}$/.test(str(e?.date)) ? e.date : todayISO(),
+      photoId: str(e?.photoId) || null,
+      rating: Math.min(5, Math.max(1, Math.round(Number(e?.rating)) || 1)),
+      changeNextTime: str(e?.changeNextTime).trim(),
+      servingsMade: posInt(e?.servingsMade, fields.baseServings),
+    })),
+  };
+}
+
+// The editable part of a recipe. Version history stores exactly this.
+function snapshotOf(r) {
+  return {
+    title: r.title,
+    category: r.category,
+    baseServings: r.baseServings,
+    ingredients: r.ingredients.map(i => ({ amount: i.amount, unit: i.unit, name: i.name })),
+    steps: r.steps.map(s => ({ text: s.text, timerSec: s.timerSec })),
+    mealPrep: r.mealPrep,
+    reheat: r.reheat,
+    notes: r.notes,
+  };
+}
+
+function entriesNewestFirst(r) {
+  return r.cookLog
+    .map((entry, index) => ({ entry, index }))
+    .sort((a, b) => b.entry.date.localeCompare(a.entry.date) || b.index - a.index)
+    .map(x => x.entry);
+}
+
+/* ---------- IndexedDB ---------- */
+
+const DB_NAME = 'making-food';
+let dbPromise;
+
+function openDB() {
+  dbPromise ||= new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, 1);
+    req.onupgradeneeded = () => {
+      const db = req.result;
+      db.createObjectStore('recipes', { keyPath: 'id' });
+      // Photos are stored as ArrayBuffers rather than Blobs; older iOS versions were unreliable with Blobs in IndexedDB.
+      db.createObjectStore('photos', { keyPath: 'id' });
+      db.createObjectStore('meta');
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+  return dbPromise;
+}
+
+async function run(stores, mode, fn) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(stores, mode);
+    let result;
+    const req = fn(tx);
+    if (req && 'onsuccess' in req) req.onsuccess = () => { result = req.result; };
+    tx.oncomplete = () => resolve(result);
+    tx.onerror = tx.onabort = () => reject(tx.error || new Error('Storage error'));
+  });
+}
+
+const db = {
+  allRecipes: () => run('recipes', 'readonly', tx => tx.objectStore('recipes').getAll()),
+  putRecipe: r => run('recipes', 'readwrite', tx => tx.objectStore('recipes').put(r)),
+  deleteRecipe: id => run('recipes', 'readwrite', tx => tx.objectStore('recipes').delete(id)),
+  getPhoto: id => run('photos', 'readonly', tx => tx.objectStore('photos').get(id)),
+  allPhotos: () => run('photos', 'readonly', tx => tx.objectStore('photos').getAll()),
+  photoIds: () => run('photos', 'readonly', tx => tx.objectStore('photos').getAllKeys()),
+  getMeta: key => run('meta', 'readonly', tx => tx.objectStore('meta').get(key)),
+};
+
+async function seedIfNeeded() {
+  if (await db.getMeta('seeded')) return;
+  const recipes = SEED_RECIPES.map(r => normalizeRecipe({ ...r, coverPhotoId: null, notes: '', versions: [], cookLog: [] }));
+  await run(['recipes', 'meta'], 'readwrite', tx => {
+    const store = tx.objectStore('recipes');
+    recipes.forEach(r => store.put(r));
+    tx.objectStore('meta').put(true, 'seeded');
+  });
+}
+
+const photoURLs = new Map();
+async function photoURL(id) {
+  if (!photoURLs.has(id)) {
+    const photo = await db.getPhoto(id);
+    if (!photo) return null;
+    photoURLs.set(id, URL.createObjectURL(new Blob([photo.data], { type: photo.type })));
+  }
+  return photoURLs.get(id);
+}
+
+function forgetPhotoURLs(ids) {
+  for (const id of ids ?? [...photoURLs.keys()]) {
+    if (photoURLs.has(id)) URL.revokeObjectURL(photoURLs.get(id));
+    photoURLs.delete(id);
+  }
+}
+
+// Removes photos no recipe points to any more (after deleting a log entry or a recipe).
+async function deleteUnusedPhotos() {
+  const used = new Set();
+  for (const r of state.recipes) {
+    if (r.coverPhotoId) used.add(r.coverPhotoId);
+    r.cookLog.forEach(e => e.photoId && used.add(e.photoId));
+  }
+  const unused = (await db.photoIds()).filter(id => !used.has(id));
+  if (!unused.length) return;
+  await run('photos', 'readwrite', tx => {
+    const store = tx.objectStore('photos');
+    unused.forEach(id => store.delete(id));
+  });
+  forgetPhotoURLs(unused);
+}
+
+/* ---------- State ---------- */
+
+const state = {
+  recipes: [],
+  category: 'chicken',
+  viewId: null,
+  servings: 4,
+  checks: new Map(),
+  editing: null,
+  log: null,
+};
+
+const getRecipe = id => state.recipes.find(r => r.id === id);
+
+async function saveRecipe(recipe) {
+  await db.putRecipe(recipe);
+  const i = state.recipes.findIndex(r => r.id === recipe.id);
+  if (i >= 0) state.recipes[i] = recipe; else state.recipes.push(recipe);
+}
+
+function tileClass(id) {
+  let hash = 0;
+  for (const ch of id) hash = (hash * 31 + ch.charCodeAt(0)) >>> 0;
+  return `t${(hash % 6) + 1}`;
+}
+
+/* ---------- Sheets ---------- */
+
+function openSheet(el) {
+  el.classList.add('open');
+  el.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('locked');
+}
+
+function closeSheet(el) {
+  el.classList.remove('open');
+  el.setAttribute('aria-hidden', 'true');
+  if (!document.querySelector('.sheet.open')) document.body.classList.remove('locked');
+}
+
+function chooseAction(title, actions) {
+  const sheet = $('#actionSheet');
+  const listEl = $('#actionList');
+  listEl.innerHTML = (title ? `<p class="action-title">${esc(title)}</p>` : '') +
+    actions.map(a => `<button type="button" data-id="${esc(a.id)}" class="${a.destructive ? 'destructive' : ''}">${esc(a.label)}</button>`).join('');
+  sheet.hidden = false;
+  return new Promise(resolve => {
+    const finish = id => {
+      sheet.hidden = true;
+      sheet.onclick = null;
+      resolve(id);
+    };
+    sheet.onclick = e => {
+      const btn = e.target.closest('button');
+      if (btn?.dataset.id) finish(btn.dataset.id);
+      else if (btn?.id === 'actionCancel' || e.target === sheet) finish(null);
+    };
+  });
+}
+
+/* ---------- Main screen ---------- */
+
+function setCategory(category) {
+  state.category = category;
+  try { localStorage.setItem('category', category); } catch { /* storage can be unavailable; the default works */ }
+  document.querySelectorAll('.top [data-cat]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.cat === category)));
+  renderGrid();
+}
+
+function renderGrid() {
+  const grid = $('#grid');
+  const recipes = state.recipes
+    .filter(r => r.category === state.category)
+    .sort((a, b) => a.title.localeCompare(b.title));
+  grid.innerHTML = recipes.map(r => `
+    <button type="button" class="card" data-id="${esc(r.id)}">
+      <div class="card-media">${r.coverPhotoId
+        ? `<img alt="" data-photo="${esc(r.coverPhotoId)}">`
+        : `<div class="tile ${tileClass(r.id)} ${r.title.length > 34 ? 'long' : ''}"><span>${esc(r.title)}</span></div>`}</div>
+      <span class="card-name">${esc(r.title)}</span>
+    </button>`).join('');
+  const empty = $('#empty');
+  empty.hidden = recipes.length > 0;
+  empty.textContent = `No ${state.category} recipes yet. Tap + to add one.`;
+  hydratePhotos(grid);
+}
+
+async function hydratePhotos(root) {
+  for (const img of root.querySelectorAll('img[data-photo]')) {
+    const url = await photoURL(img.dataset.photo);
+    if (url) img.src = url;
+    else img.remove();
+  }
+}
+
+/* ---------- Recipe view ---------- */
+
+function starsHTML(rating) {
+  return `<span class="stars" role="img" aria-label="${rating} out of 5 stars">${[1, 2, 3, 4, 5].map(n => `<span class="${n <= rating ? '' : 'off'}">${ICONS.star}</span>`).join('')}</span>`;
+}
+
+function textBlock(text, emptyText = 'Nothing added yet.') {
+  return text ? `<p class="prose">${esc(text)}</p>` : `<p class="muted">${emptyText}</p>`;
+}
+
+function checksFor(id) {
+  if (!state.checks.has(id)) state.checks.set(id, new Set());
+  return state.checks.get(id);
+}
+
+function openView(id) {
+  const r = getRecipe(id);
+  if (!r) return;
+  state.viewId = id;
+  state.servings = r.baseServings;
+  renderView();
+  $('#viewBody').scrollTop = 0;
+  openSheet($('#viewSheet'));
+}
+
+function lastTimeHTML(r) {
+  const entries = entriesNewestFirst(r);
+  if (!entries.length) return '';
+  const last = entries[0];
+  const noteEntry = entries.find(e => e.changeNextTime);
+  const noteFrom = noteEntry && noteEntry !== last ? ` (${esc(formatDate(noteEntry.date))})` : '';
+  return `<div class="last-time">
+      <div class="last-row"><span class="label">Last made ${esc(formatDate(last.date))}</span>${starsHTML(last.rating)}</div>
+      ${noteEntry ? `<p class="last-note"><span class="label">Change next time${noteFrom}:</span> ${esc(noteEntry.changeNextTime)}</p>` : ''}
+    </div>`;
+}
+
+function renderView() {
+  const r = getRecipe(state.viewId);
+  if (!r) return;
+  const body = $('#viewBody');
+  const entries = entriesNewestFirst(r);
+  body.innerHTML = `
+    <div class="hero">
+      ${r.coverPhotoId ? `<img alt="" data-photo="${esc(r.coverPhotoId)}">` : `<div class="tile ${tileClass(r.id)}"><span>${esc(r.title)}</span></div>`}
+      <button type="button" class="close-btn" data-action="close-view" aria-label="Close">${ICONS.close}</button>
+    </div>
+    <div class="content">
+      <h1 class="title">${esc(r.title)}</h1>
+      ${lastTimeHTML(r)}
+      <div class="servings">
+        <span class="label">Servings</span>
+        <div class="stepper">
+          <button type="button" data-action="servings-down" aria-label="Fewer servings">${ICONS.minus}</button>
+          <output id="servingsOut" aria-live="polite"></output>
+          <button type="button" data-action="servings-up" aria-label="More servings">${ICONS.plus}</button>
+        </div>
+      </div>
+      <p class="scaled-note muted small" id="scaledNote"></p>
+      <h2 class="section">Ingredients</h2>
+      <ul class="checklist" id="ingredientList"></ul>
+      <h2 class="section">Steps</h2>
+      ${r.steps.length ? `<ol class="steps">${r.steps.map((s, i) => `
+        <li><span class="num" aria-hidden="true">${i + 1}</span><div>
+          <p><span class="sr-only">Step ${i + 1}. </span>${esc(s.text)}</p>
+          ${s.timerSec ? `<div class="timer" data-timer="${esc(timerKey(r.id, i))}" data-sec="${s.timerSec}" data-step="${i + 1}"></div>` : ''}
+        </div></li>`).join('')}</ol>` : textBlock('')}
+      <h2 class="section">Meal prep and storage</h2>
+      ${textBlock(r.mealPrep)}
+      <h2 class="section">Air fryer reheat</h2>
+      ${textBlock(r.reheat)}
+      <h2 class="section">My notes</h2>
+      ${textBlock(r.notes, 'No notes yet.')}
+      ${entries.length ? `<h2 class="section">Cook log</h2>
+        <div class="timeline">${entries.map(e => `
+          <button type="button" class="log-item" data-action="log-entry" data-id="${esc(e.id)}">
+            <div class="log-media">${e.photoId ? `<img alt="" data-photo="${esc(e.photoId)}">` : `<div class="tile ${tileClass(r.id)}"><span>No photo</span></div>`}</div>
+            <div class="log-meta"><span>${esc(formatDate(e.date))}</span>${starsHTML(e.rating)}</div>
+            <div class="muted small">${e.servingsMade} ${e.servingsMade === 1 ? 'serving' : 'servings'}</div>
+            ${e.changeNextTime ? `<p class="log-change">${esc(e.changeNextTime)}</p>` : ''}
+          </button>`).join('')}</div>` : ''}
+    </div>`;
+  renderIngredients();
+  renderTimers();
+  hydratePhotos(body);
+}
+
+function renderIngredients() {
+  const r = getRecipe(state.viewId);
+  const scale = state.servings / r.baseServings;
+  const checks = checksFor(r.id);
+  $('#servingsOut').textContent = state.servings;
+  $('[data-action="servings-down"]').disabled = state.servings <= 1;
+  $('#scaledNote').textContent = state.servings === r.baseServings ? '' : `Amounts scaled from ${r.baseServings} servings.`;
+  $('#ingredientList').innerHTML = r.ingredients.length ? r.ingredients.map((ing, i) => {
+    const { qty, name } = ingredientParts(ing, scale);
+    return `<li><button type="button" class="check" role="checkbox" aria-checked="${checks.has(i)}" data-action="toggle-check" data-index="${i}">
+      <span class="box">${ICONS.check}</span>
+      <span class="ing-text">${qty ? `<span class="qty">${esc(qty)}</span> ` : ''}${esc(name)}</span>
+    </button></li>`;
+  }).join('') : `<li class="muted">Nothing added yet.</li>`;
+}
+
+/* ---------- Step timers ---------- */
+
+// Timers store an absolute end time, so they stay correct even if iOS pauses the page in the background.
+const timers = new Map();
+let tickHandle = null;
+let audioCtx = null;
+let wakeLock = null;
+
+const timerKey = (recipeId, stepIndex) => `${recipeId}#${stepIndex}`;
+
+function timerRemaining(t) {
+  return t.endAt ? Math.max(0, t.endAt - Date.now()) : t.remainingMs;
+}
+
+function toggleTimer(key, totalSec) {
+  unlockAudio();
+  const t = timers.get(key);
+  if (!t) timers.set(key, { remainingMs: totalSec * 1000, endAt: Date.now() + totalSec * 1000, done: false });
+  else if (t.done) timers.delete(key);
+  else if (t.endAt) { t.remainingMs = timerRemaining(t); t.endAt = null; }
+  else t.endAt = Date.now() + t.remainingMs;
+  tick();
+}
+
+function clearTimersFor(recipeId) {
+  for (const key of [...timers.keys()]) if (key.startsWith(`${recipeId}#`)) timers.delete(key);
+  tick();
+}
+
+function tick() {
+  for (const [key, t] of timers) {
+    if (t.endAt && t.endAt <= Date.now()) {
+      t.endAt = null;
+      t.remainingMs = 0;
+      t.done = true;
+      timerFinished(key);
+    }
+  }
+  renderTimers();
+  const running = [...timers.values()].some(t => t.endAt);
+  if (running && !tickHandle) tickHandle = setInterval(tick, 250);
+  if (!running && tickHandle) { clearInterval(tickHandle); tickHandle = null; }
+  updateWakeLock(running);
+}
+
+function renderTimers() {
+  document.querySelectorAll('#viewBody .timer').forEach(el => {
+    const t = timers.get(el.dataset.timer);
+    const totalMs = Number(el.dataset.sec) * 1000;
+    let cls = '';
+    let icon = ICONS.clock;
+    let label = `Start ${formatDuration(totalMs)}`;
+    let aria = `Start ${formatDuration(totalMs)} timer for step ${el.dataset.step}`;
+    if (t?.done) { cls = 'done'; icon = ICONS.check; label = 'Done'; aria = 'Timer done. Tap to clear.'; }
+    else if (t?.endAt) { cls = 'running'; icon = ICONS.pause; label = formatDuration(timerRemaining(t)); aria = `${label} left. Tap to pause.`; }
+    else if (t) { icon = ICONS.play; label = `${formatDuration(t.remainingMs)} paused`; aria = `Paused at ${formatDuration(t.remainingMs)}. Tap to resume.`; }
+    const html = `<button type="button" class="timer-btn ${cls}" data-action="timer-toggle" aria-label="${esc(aria)}">${icon}<span>${esc(label)}</span></button>` +
+      (t ? `<button type="button" class="timer-reset" data-action="timer-reset">Reset</button>` : '');
+    // Only touch the DOM when the label changes, so a tap landing mid-tick is not lost.
+    if (el.dataset.rendered !== html) { el.innerHTML = html; el.dataset.rendered = html; }
+  });
+}
+
+function timerFinished(key) {
+  const [recipeId, index] = [key.slice(0, key.lastIndexOf('#')), Number(key.slice(key.lastIndexOf('#') + 1))];
+  const r = getRecipe(recipeId);
+  toast(`Timer done${r ? `: ${r.title}, step ${index + 1}` : ''}`);
+  navigator.vibrate?.([300, 150, 300, 150, 300]);
+  beep();
+}
+
+// iOS only lets a page play sound after a tap, so the audio context is unlocked when a timer starts.
+function unlockAudio() {
+  try {
+    audioCtx ||= new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+  } catch { /* no audio available; the toast still shows */ }
+}
+
+function beep() {
+  if (!audioCtx) return;
+  const start = audioCtx.currentTime;
+  for (let i = 0; i < 4; i++) {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.frequency.value = 880;
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    const t = start + i * 0.45;
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.exponentialRampToValueAtTime(0.35, t + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.3);
+    osc.start(t);
+    osc.stop(t + 0.32);
+  }
+}
+
+// Keeps the screen awake while a timer runs; a locked phone would pause the countdown alert.
+async function updateWakeLock(running) {
+  try {
+    if (running && !wakeLock && navigator.wakeLock && document.visibilityState === 'visible') {
+      wakeLock = await navigator.wakeLock.request('screen');
+      wakeLock.addEventListener('release', () => { wakeLock = null; });
+    } else if (!running && wakeLock) {
+      await wakeLock.release();
+      wakeLock = null;
+    }
+  } catch { /* wake lock is optional */ }
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') tick();
+});
+
+/* ---------- Edit ---------- */
+
+const editForm = () => $('#editForm');
+
+function ingredientRowHTML(ing) {
+  return `<li class="row ing-row">
+    <button type="button" class="drag" aria-label="Drag to reorder">${ICONS.grip}</button>
+    <div class="ing-fields">
+      <input class="name" value="${esc(ing.name)}" placeholder="Ingredient" aria-label="Ingredient name" autocomplete="off">
+      <input class="amt" value="${esc(formatAmountForEdit(ing.amount))}" placeholder="Amount" aria-label="Amount" autocomplete="off">
+      <input class="unit" value="${esc(ing.unit)}" placeholder="Unit" aria-label="Unit" autocomplete="off" autocapitalize="off">
+    </div>
+    <button type="button" class="del" data-action="delete-row" aria-label="Delete ingredient">${ICONS.close}</button>
+  </li>`;
+}
+
+function stepRowHTML(step, index) {
+  return `<li class="row step-row">
+    <button type="button" class="drag" aria-label="Drag to reorder">${ICONS.grip}</button>
+    <div class="step-main">
+      <div class="step-head"><span class="num">${index + 1}</span></div>
+      <textarea class="text" rows="3" placeholder="Describe this step" aria-label="Step text">${esc(step.text)}</textarea>
+      <label class="timer-field"><span>Timer</span><input class="min" type="number" inputmode="decimal" min="0" step="any" value="${esc(minutesForEdit(step.timerSec))}" placeholder="None"><span>min</span></label>
+    </div>
+    <button type="button" class="del" data-action="delete-row" aria-label="Delete step">${ICONS.close}</button>
+  </li>`;
+}
+
+function versionsHTML(r) {
+  if (!r?.versions.length) return '';
+  const items = r.versions.map((v, i) => ({ v, i })).reverse();
+  return `<fieldset class="field"><legend>Version history</legend>
+    <p class="hint">Each save keeps the version it replaced. Restoring loads it into this form; tap Save to keep it.</p>
+    <ul class="versions">${items.map(({ v, i }) => `
+      <li><span>${esc(v.snapshot.title)}<br><span class="muted small">Replaced ${esc(new Date(v.replacedAt).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }))}</span></span>
+      <button type="button" class="text-btn" data-action="restore-version" data-index="${i}">Restore</button></li>`).join('')}</ul>
+  </fieldset>`;
+}
+
+function fillEditForm(data, recipe) {
+  editForm().innerHTML = `
+    <label class="field"><span>Title</span><input id="fTitle" value="${esc(data.title)}" autocomplete="off"></label>
+    <fieldset class="field"><legend>Category</legend>
+      <div class="seg">${CATEGORIES.map(c => `<label><input type="radio" name="category" value="${c}" ${data.category === c ? 'checked' : ''}><span>${cap(c)}</span></label>`).join('')}</div>
+    </fieldset>
+    <label class="field"><span>Base servings</span><input id="fServings" type="number" inputmode="numeric" min="1" step="1" value="${data.baseServings}"></label>
+    <fieldset class="field"><legend>Ingredients</legend>
+      <p class="hint">Name, then amount and unit. Amounts can be 2, 1/2, 1 1/2, or 0.25. Leave the amount blank for "to taste".</p>
+      <ul class="rows" id="ingRows">${data.ingredients.map(ingredientRowHTML).join('')}</ul>
+      <button type="button" class="add-row" data-action="add-ingredient">${ICONS.plus}Add ingredient</button>
+    </fieldset>
+    <fieldset class="field"><legend>Steps</legend>
+      <p class="hint">Add minutes to give a step a countdown timer.</p>
+      <ol class="rows" id="stepRows">${data.steps.map(stepRowHTML).join('')}</ol>
+      <button type="button" class="add-row" data-action="add-step">${ICONS.plus}Add step</button>
+    </fieldset>
+    <label class="field"><span>Meal prep and storage</span><textarea id="fMealPrep" rows="3">${esc(data.mealPrep)}</textarea></label>
+    <label class="field"><span>Air fryer reheat</span><textarea id="fReheat" rows="3">${esc(data.reheat)}</textarea></label>
+    <label class="field"><span>My notes</span><textarea id="fNotes" rows="3">${esc(data.notes)}</textarea></label>
+    ${versionsHTML(recipe)}
+    ${recipe ? `<button type="button" class="btn danger" data-action="delete-recipe">Delete recipe</button>` : ''}`;
+  editForm().querySelectorAll('.step-row textarea').forEach(autosize);
+}
+
+// Step boxes grow with their text so long steps are fully visible while editing.
+function autosize(textarea) {
+  textarea.style.height = 'auto';
+  textarea.style.height = `${textarea.scrollHeight + 2}px`;
+}
+
+function openEdit(id) {
+  const recipe = id ? getRecipe(id) : null;
+  const data = recipe ? snapshotOf(recipe) : {
+    title: '', category: state.category, baseServings: 4,
+    ingredients: [{ amount: null, unit: '', name: '' }], steps: [{ text: '', timerSec: null }],
+    mealPrep: '', reheat: '', notes: '',
+  };
+  $('#editHeading').textContent = recipe ? 'Edit recipe' : 'New recipe';
+  fillEditForm(data, recipe);
+  state.editing = { id: recipe?.id ?? null, initial: JSON.stringify(readEditForm().data) };
+  $('#editScroll').scrollTop = 0;
+  openSheet($('#editSheet'));
+}
+
+function readEditForm() {
+  const form = editForm();
+  const errors = [];
+  form.querySelectorAll('[aria-invalid]').forEach(el => el.removeAttribute('aria-invalid'));
+  const fail = (el, message) => errors.push({ el, message });
+
+  const titleEl = $('#fTitle', form);
+  const title = titleEl.value.trim();
+  if (!title) fail(titleEl, 'Add a title.');
+
+  const servingsEl = $('#fServings', form);
+  const baseServings = Number(servingsEl.value);
+  if (!Number.isInteger(baseServings) || baseServings < 1) fail(servingsEl, 'Base servings must be a whole number, 1 or more.');
+
+  const ingredients = [];
+  for (const row of form.querySelectorAll('.ing-row')) {
+    const [amtEl, unitEl, nameEl] = ['.amt', '.unit', '.name'].map(s => $(s, row));
+    const name = nameEl.value.trim();
+    const unit = unitEl.value.trim();
+    if (!name && !unit && !amtEl.value.trim()) continue;
+    if (!name) fail(nameEl, 'Each ingredient needs a name.');
+    const amount = parseAmount(amtEl.value);
+    if (Number.isNaN(amount)) fail(amtEl, `"${amtEl.value.trim()}" is not an amount. Use 2, 1/2, 1 1/2, or 0.25.`);
+    ingredients.push({ amount: Number.isNaN(amount) ? null : amount, unit, name });
+  }
+
+  const steps = [];
+  for (const row of form.querySelectorAll('.step-row')) {
+    const textEl = $('.text', row);
+    const minEl = $('.min', row);
+    const text = textEl.value.trim();
+    const minText = minEl.value.trim();
+    if (!text && !minText) continue;
+    if (!text) fail(textEl, 'A step with a timer needs a description.');
+    const minutes = minText ? Number(minText) : 0;
+    if (!Number.isFinite(minutes) || minutes < 0) fail(minEl, 'Timer minutes must be 0 or more.');
+    steps.push({ text, timerSec: minutes > 0 ? Math.round(minutes * 60) : null });
+  }
+
+  return {
+    errors,
+    data: {
+      title,
+      category: form.querySelector('input[name="category"]:checked')?.value ?? state.category,
+      baseServings,
+      ingredients,
+      steps,
+      mealPrep: $('#fMealPrep', form).value.trim(),
+      reheat: $('#fReheat', form).value.trim(),
+      notes: $('#fNotes', form).value.trim(),
+    },
+  };
+}
+
+async function saveEdit() {
+  const { errors, data } = readEditForm();
+  if (errors.length) {
+    errors.forEach(e => e.el.setAttribute('aria-invalid', 'true'));
+    errors[0].el.focus();
+    toast(errors[0].message);
+    return;
+  }
+  const existing = state.editing.id ? getRecipe(state.editing.id) : null;
+  let recipe;
+  if (existing) {
+    const before = snapshotOf(existing);
+    const changed = JSON.stringify(before) !== JSON.stringify(data);
+    recipe = normalizeRecipe({
+      ...existing,
+      ...data,
+      versions: changed ? [...existing.versions, { replacedAt: new Date().toISOString(), snapshot: before }] : existing.versions,
+    });
+  } else {
+    recipe = normalizeRecipe({ id: uid('r'), ...data, coverPhotoId: null, versions: [], cookLog: [] });
+  }
+  try {
+    await saveRecipe(recipe);
+  } catch (err) {
+    toast(`Could not save: ${err.message}`);
+    return;
+  }
+  // Step numbers may have moved, so running timers for this recipe no longer match their steps.
+  clearTimersFor(recipe.id);
+  state.checks.delete(recipe.id);
+  closeSheet($('#editSheet'));
+  setCategory(recipe.category);
+  if (existing) {
+    state.servings = recipe.baseServings;
+    renderView();
+  } else {
+    openView(recipe.id);
+  }
+  toast('Saved');
+}
+
+function cancelEdit() {
+  const dirty = JSON.stringify(readEditForm().data) !== state.editing.initial;
+  if (dirty && !confirm('Discard your changes?')) return;
+  closeSheet($('#editSheet'));
+}
+
+async function deleteRecipe() {
+  const r = getRecipe(state.editing.id);
+  if (!r || !confirm(`Delete "${r.title}"? Its cook log and photos are deleted too.`)) return;
+  await db.deleteRecipe(r.id);
+  state.recipes = state.recipes.filter(x => x.id !== r.id);
+  clearTimersFor(r.id);
+  await deleteUnusedPhotos();
+  closeSheet($('#editSheet'));
+  closeSheet($('#viewSheet'));
+  renderGrid();
+  toast('Recipe deleted');
+}
+
+function renumberSteps() {
+  editForm().querySelectorAll('.step-row .num').forEach((el, i) => { el.textContent = i + 1; });
+}
+
+// Pointer-based drag so reordering works with touch on iOS, where HTML5 drag and drop does not.
+// The dragged row never leaves the DOM (its neighbors move around it) so the touch is not cancelled.
+function startRowDrag(e) {
+  const handle = e.target.closest('.drag');
+  if (!handle) return;
+  e.preventDefault();
+  const row = handle.closest('.row');
+  const scroller = $('#editScroll');
+  row.classList.add('dragging');
+  // Scroll anchoring would cancel the auto-scroll each time the row moves past the anchor.
+  scroller.style.overflowAnchor = 'none';
+  let y = e.clientY;
+  let frame = 0;
+  const middle = el => el.getBoundingClientRect().top + el.offsetHeight / 2;
+  const place = () => {
+    for (;;) {
+      const prev = row.previousElementSibling;
+      const next = row.nextElementSibling;
+      if (prev && y < middle(prev)) row.after(prev);
+      else if (next && y > middle(next)) row.before(next);
+      else break;
+    }
+    renumberSteps();
+  };
+  // Keeps scrolling while the finger rests near an edge, so a row can travel past the visible area.
+  const autoScroll = () => {
+    const bounds = scroller.getBoundingClientRect();
+    const speed = y < bounds.top + 70 ? -12 : y > bounds.bottom - 70 ? 12 : 0;
+    if (speed) {
+      scroller.scrollBy(0, speed);
+      place();
+    }
+    frame = requestAnimationFrame(autoScroll);
+  };
+  frame = requestAnimationFrame(autoScroll);
+  const move = ev => {
+    y = ev.clientY;
+    place();
+  };
+  const end = () => {
+    cancelAnimationFrame(frame);
+    scroller.style.overflowAnchor = '';
+    row.classList.remove('dragging');
+    window.removeEventListener('pointermove', move);
+    window.removeEventListener('pointerup', end);
+    window.removeEventListener('pointercancel', end);
+  };
+  window.addEventListener('pointermove', move);
+  window.addEventListener('pointerup', end);
+  window.addEventListener('pointercancel', end);
+}
+
+/* ---------- I made this ---------- */
+
+async function compressImage(file, maxWidth = 1200, quality = 0.82) {
+  const url = URL.createObjectURL(file);
+  try {
+    const img = await new Promise((resolve, reject) => {
+      const el = new Image();
+      el.onload = () => resolve(el);
+      el.onerror = () => reject(new Error('That photo could not be read.'));
+      el.src = url;
+    });
+    const scale = Math.min(1, maxWidth / img.naturalWidth);
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.round(img.naturalWidth * scale);
+    canvas.height = Math.round(img.naturalHeight * scale);
+    canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', quality));
+    if (!blob) throw new Error('That photo could not be saved.');
+    return blob;
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
+function takePhoto() {
+  const input = $('#cameraInput');
+  input.value = '';
+  input.click();
+}
+
+async function handleCapturedFile() {
+  const file = $('#cameraInput').files[0];
+  if (!file) return;
+  try {
+    const blob = await compressImage(file);
+    if (!$('#logSheet').classList.contains('open')) openLog();
+    if (state.log.photo) URL.revokeObjectURL(state.log.photo.url);
+    state.log.photo = { blob, url: URL.createObjectURL(blob) };
+    renderLogPhoto();
+  } catch (err) {
+    toast(err.message);
+  }
+}
+
+function openLog() {
+  const r = getRecipe(state.viewId);
+  state.log = { rating: 0, servings: state.servings, photo: null };
+  $('#logForm').innerHTML = `
+    <div class="log-photo" id="logPhoto"></div>
+    <button type="button" class="text-btn retake" id="retakeBtn" data-action="log-photo" hidden>Retake photo</button>
+    <label class="field"><span>Date</span><input type="date" id="logDate" value="${todayISO()}"></label>
+    <fieldset class="field"><legend>Rating</legend>
+      <div class="stars-input" role="radiogroup" aria-label="Rating">${[1, 2, 3, 4, 5].map(n =>
+        `<button type="button" role="radio" aria-checked="false" aria-label="${n} star${n > 1 ? 's' : ''}" data-action="rate" data-value="${n}" class="off">${ICONS.star}</button>`).join('')}</div>
+    </fieldset>
+    <label class="field"><span>What I'd change next time</span><textarea id="logChange" rows="3"></textarea></label>
+    <div class="servings log-servings">
+      <span class="label">Servings I made</span>
+      <div class="stepper">
+        <button type="button" data-action="log-servings-down" aria-label="Fewer servings">${ICONS.minus}</button>
+        <output id="logServings"></output>
+        <button type="button" data-action="log-servings-up" aria-label="More servings">${ICONS.plus}</button>
+      </div>
+    </div>
+    <label class="check-row" id="coverRow" hidden><input type="checkbox" id="logCover" ${r.coverPhotoId ? '' : 'checked'}> Use as cover photo</label>`;
+  renderLogPhoto();
+  renderLogServings();
+  openSheet($('#logSheet'));
+}
+
+function renderLogPhoto() {
+  const photo = state.log.photo;
+  $('#logPhoto').innerHTML = photo
+    ? `<img alt="Photo of what I made" src="${photo.url}">`
+    : `<button type="button" class="photo-placeholder" data-action="log-photo">${ICONS.camera}Add photo</button>`;
+  $('#retakeBtn').hidden = !photo;
+  $('#coverRow').hidden = !photo;
+}
+
+function renderLogServings() {
+  $('#logServings').textContent = state.log.servings;
+  $('[data-action="log-servings-down"]').disabled = state.log.servings <= 1;
+}
+
+function renderRating() {
+  document.querySelectorAll('#logForm [data-action="rate"]').forEach(b => {
+    const n = Number(b.dataset.value);
+    b.classList.toggle('off', n > state.log.rating);
+    b.setAttribute('aria-checked', String(n === state.log.rating));
+  });
+}
+
+function closeLog() {
+  if (state.log?.photo) URL.revokeObjectURL(state.log.photo.url);
+  state.log = null;
+  closeSheet($('#logSheet'));
+}
+
+async function saveLog() {
+  const r = getRecipe(state.viewId);
+  if (!state.log.rating) { toast('Tap a star rating first.'); return; }
+  const date = $('#logDate').value || todayISO();
+  const photo = state.log.photo
+    ? { id: uid('p'), type: 'image/jpeg', data: await state.log.photo.blob.arrayBuffer() }
+    : null;
+  const entry = {
+    id: uid('c'),
+    date,
+    photoId: photo?.id ?? null,
+    rating: state.log.rating,
+    changeNextTime: $('#logChange').value.trim(),
+    servingsMade: state.log.servings,
+  };
+  const updated = {
+    ...r,
+    cookLog: [...r.cookLog, entry],
+    coverPhotoId: photo && $('#logCover').checked ? photo.id : r.coverPhotoId,
+  };
+  try {
+    // Photo and log entry are written in one transaction so neither can exist without the other.
+    await run(['recipes', 'photos'], 'readwrite', tx => {
+      if (photo) tx.objectStore('photos').put(photo);
+      tx.objectStore('recipes').put(updated);
+    });
+  } catch (err) {
+    toast(`Could not save: ${err.message}`);
+    return;
+  }
+  state.recipes[state.recipes.findIndex(x => x.id === r.id)] = updated;
+  closeLog();
+  renderView();
+  renderGrid();
+  toast('Added to cook log');
+}
+
+async function logEntryActions(entryId) {
+  const r = getRecipe(state.viewId);
+  const entry = r.cookLog.find(e => e.id === entryId);
+  if (!entry) return;
+  const actions = [];
+  if (entry.photoId && entry.photoId !== r.coverPhotoId) actions.push({ id: 'cover', label: 'Use as cover photo' });
+  actions.push({ id: 'delete', label: 'Delete entry', destructive: true });
+  const choice = await chooseAction(`${formatDate(entry.date)}`, actions);
+  if (choice === 'cover') {
+    await saveRecipe({ ...r, coverPhotoId: entry.photoId });
+    toast('Cover photo updated');
+  } else if (choice === 'delete') {
+    if (!confirm('Delete this cook log entry?')) return;
+    await saveRecipe({ ...r, cookLog: r.cookLog.filter(e => e.id !== entryId) });
+    await deleteUnusedPhotos();
+    toast('Entry deleted');
+  } else {
+    return;
+  }
+  renderView();
+  renderGrid();
+}
+
+/* ---------- Backup ---------- */
+
+function bufferToBase64(buffer) {
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) binary += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  return btoa(binary);
+}
+
+function base64ToBuffer(base64) {
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return bytes.buffer;
+}
+
+async function exportBackup() {
+  const [recipes, photos] = await Promise.all([db.allRecipes(), db.allPhotos()]);
+  const backup = {
+    app: 'making-food',
+    format: 1,
+    exportedAt: new Date().toISOString(),
+    recipes,
+    photos: photos.map(p => ({ id: p.id, type: p.type, data: bufferToBase64(p.data) })),
+  };
+  const name = `making-food-backup-${todayISO()}.json`;
+  const blob = new Blob([JSON.stringify(backup)], { type: 'application/json' });
+  const file = new File([blob], name, { type: 'application/json' });
+  // On iPhone the share sheet is the dependable way to save a file ("Save to Files").
+  if (navigator.canShare?.({ files: [file] })) {
+    try {
+      await navigator.share({ files: [file], title: name });
+      return;
+    } catch (err) {
+      if (err.name === 'AbortError') return;
+    }
+  }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  document.body.append(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+}
+
+function parseBackup(text) {
+  let backup;
+  try { backup = JSON.parse(text); } catch { throw new Error('the file is not valid JSON.'); }
+  if (backup?.app !== 'making-food' || backup.format !== 1) throw new Error('this is not a Making Food backup.');
+  if (!Array.isArray(backup.recipes) || !Array.isArray(backup.photos)) throw new Error('the backup is missing recipes or photos.');
+  const recipes = backup.recipes.map(normalizeRecipe);
+  if (new Set(recipes.map(r => r.id)).size !== recipes.length) throw new Error('two recipes share the same id.');
+  const photos = backup.photos.map(p => {
+    if (typeof p?.id !== 'string' || typeof p.data !== 'string') throw new Error('a photo in the file is damaged.');
+    let data;
+    try { data = base64ToBuffer(p.data); } catch { throw new Error('a photo in the file is damaged.'); }
+    return { id: p.id, type: str(p.type).startsWith('image/') ? p.type : 'image/jpeg', data };
+  });
+  return { recipes, photos };
+}
+
+async function importBackup() {
+  const input = $('#importInput');
+  const file = input.files[0];
+  input.value = '';
+  if (!file) return;
+  try {
+    const { recipes, photos } = parseBackup(await file.text());
+    const message = `Replace everything in the app with this backup? It has ${recipes.length} recipe${recipes.length === 1 ? '' : 's'} and ${photos.length} photo${photos.length === 1 ? '' : 's'}. The recipes on this phone now will be removed.`;
+    if (!confirm(message)) return;
+    await run(['recipes', 'photos', 'meta'], 'readwrite', tx => {
+      const recipeStore = tx.objectStore('recipes');
+      const photoStore = tx.objectStore('photos');
+      recipeStore.clear();
+      photoStore.clear();
+      recipes.forEach(r => recipeStore.put(r));
+      photos.forEach(p => photoStore.put(p));
+      tx.objectStore('meta').put(true, 'seeded');
+    });
+    forgetPhotoURLs();
+    timers.clear();
+    tick();
+    state.checks.clear();
+    state.recipes = await db.allRecipes();
+    closeSheet($('#viewSheet'));
+    renderGrid();
+    toast('Backup imported');
+  } catch (err) {
+    toast(`Could not import: ${err.message}`);
+  }
+}
+
+/* ---------- Wiring ---------- */
+
+function wire() {
+  $('#menuBtn').innerHTML = ICONS.more;
+  $('#addBtn').innerHTML = ICONS.plus;
+
+  document.querySelectorAll('.top [data-cat]').forEach(b => b.addEventListener('click', () => setCategory(b.dataset.cat)));
+  $('#grid').addEventListener('click', e => {
+    const card = e.target.closest('.card');
+    if (card) openView(card.dataset.id);
+  });
+  $('#addBtn').addEventListener('click', () => openEdit(null));
+  $('#menuBtn').addEventListener('click', async () => {
+    const choice = await chooseAction(null, [{ id: 'export', label: 'Export backup' }, { id: 'import', label: 'Import backup' }]);
+    if (choice === 'export') exportBackup().catch(err => toast(`Could not export: ${err.message}`));
+    if (choice === 'import') $('#importInput').click();
+  });
+  $('#importInput').addEventListener('change', importBackup);
+
+  $('#viewBody').addEventListener('click', e => {
+    const btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    const r = getRecipe(state.viewId);
+    switch (btn.dataset.action) {
+      case 'close-view': closeSheet($('#viewSheet')); break;
+      case 'servings-down': if (state.servings > 1) { state.servings--; renderIngredients(); } break;
+      case 'servings-up': state.servings++; renderIngredients(); break;
+      case 'toggle-check': {
+        const checks = checksFor(r.id);
+        const i = Number(btn.dataset.index);
+        if (checks.has(i)) checks.delete(i); else checks.add(i);
+        btn.setAttribute('aria-checked', String(checks.has(i)));
+        break;
+      }
+      case 'timer-toggle': {
+        const holder = btn.closest('.timer');
+        toggleTimer(holder.dataset.timer, Number(holder.dataset.sec));
+        break;
+      }
+      case 'timer-reset': timers.delete(btn.closest('.timer').dataset.timer); tick(); break;
+      case 'log-entry': logEntryActions(btn.dataset.id); break;
+    }
+  });
+  $('#editBtn').addEventListener('click', () => openEdit(state.viewId));
+  $('#madeBtn').addEventListener('click', takePhoto);
+
+  $('#editScroll').addEventListener('submit', e => e.preventDefault());
+  $('#saveEdit').addEventListener('click', saveEdit);
+  $('#cancelEdit').addEventListener('click', cancelEdit);
+  editForm().addEventListener('pointerdown', startRowDrag);
+  editForm().addEventListener('input', e => {
+    if (e.target.matches('.step-row textarea')) autosize(e.target);
+  });
+  editForm().addEventListener('click', e => {
+    const btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    switch (btn.dataset.action) {
+      case 'add-ingredient': {
+        $('#ingRows').insertAdjacentHTML('beforeend', ingredientRowHTML({ amount: null, unit: '', name: '' }));
+        $('#ingRows').lastElementChild.querySelector('.name').focus();
+        break;
+      }
+      case 'add-step': {
+        const rows = $('#stepRows');
+        rows.insertAdjacentHTML('beforeend', stepRowHTML({ text: '', timerSec: null }, rows.children.length));
+        rows.lastElementChild.querySelector('.text').focus();
+        break;
+      }
+      case 'delete-row': btn.closest('.row').remove(); renumberSteps(); break;
+      case 'restore-version': {
+        const r = getRecipe(state.editing.id);
+        const v = r.versions[Number(btn.dataset.index)];
+        if (!confirm('Load this older version into the form? Nothing changes until you tap Save.')) return;
+        fillEditForm(v.snapshot, r);
+        $('#editScroll').scrollTop = 0;
+        toast('Older version loaded. Tap Save to keep it.');
+        break;
+      }
+      case 'delete-recipe': deleteRecipe(); break;
+    }
+  });
+
+  $('#cameraInput').addEventListener('change', handleCapturedFile);
+  // If the camera is dismissed without a photo, still let the cook be logged.
+  $('#cameraInput').addEventListener('cancel', () => {
+    if (!$('#logSheet').classList.contains('open')) openLog();
+  });
+  $('#saveLog').addEventListener('click', saveLog);
+  $('#cancelLog').addEventListener('click', closeLog);
+  $('#logForm').addEventListener('click', e => {
+    const btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    switch (btn.dataset.action) {
+      case 'log-photo': takePhoto(); break;
+      case 'rate': state.log.rating = Number(btn.dataset.value); renderRating(); break;
+      case 'log-servings-down': if (state.log.servings > 1) { state.log.servings--; renderLogServings(); } break;
+      case 'log-servings-up': state.log.servings++; renderLogServings(); break;
+    }
+  });
+}
+
+async function boot() {
+  wire();
+  try {
+    const saved = localStorage.getItem('category');
+    if (CATEGORIES.includes(saved)) state.category = saved;
+  } catch { /* storage can be unavailable; the default works */ }
+  try {
+    await seedIfNeeded();
+    state.recipes = await db.allRecipes();
+  } catch (err) {
+    toast(`Could not open storage: ${err.message}`);
+  }
+  setCategory(state.category);
+  // Asks the browser not to evict this app's data under storage pressure.
+  navigator.storage?.persist?.().catch(() => {});
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+
+boot();
+</script>
+</body>
+</html>
