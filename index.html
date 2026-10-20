@@ -260,6 +260,7 @@ svg { display: block; }
 .timer-field { display: flex; align-items: center; gap: 8px; font-size: 15px; color: var(--muted); }
 .form .timer-field input.min { flex: 0 0 96px; width: 96px; }
 .log-servings { margin: 0 0 22px; }
+.cover-actions { display: flex; gap: 8px; margin-left: -10px; }
 .add-row { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; margin-top: 8px; color: var(--accent); font-weight: 600; }
 .add-row svg { width: 20px; height: 20px; }
 .versions { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
@@ -346,6 +347,7 @@ svg { display: block; }
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <input type="file" id="cameraInput" accept="image/*" capture="environment" hidden>
 <input type="file" id="importInput" accept="application/json,.json" hidden>
+<input type="file" id="coverInput" accept="image/*" hidden>
 
 <script>
 'use strict';
@@ -1449,8 +1451,48 @@ function versionsHTML(r) {
   </fieldset>`;
 }
 
+// state.editing.cover: undefined keeps the current cover, null removes it, { blob, url } replaces it.
+function renderCoverField() {
+  const recipe = state.editing.id ? getRecipe(state.editing.id) : null;
+  const cover = state.editing.cover;
+  const existingId = cover === undefined ? recipe?.coverPhotoId : null;
+  const preview = cover ? `<img alt="" src="${cover.url}">`
+    : existingId ? `<img alt="" data-photo="${esc(existingId)}">`
+    : `<button type="button" class="photo-placeholder" data-action="choose-cover">${ICONS.camera}Add a cover photo</button>`;
+  const field = $('#coverField');
+  field.innerHTML = `<span>Cover photo</span>
+    <div class="log-photo">${preview}</div>
+    <p class="hint">Shown on the recipe card. Pick any picture from your Photos, or take one.</p>
+    <div class="cover-actions">
+      <button type="button" class="text-btn" data-action="choose-cover">${cover || existingId ? 'Change photo' : 'Choose photo'}</button>
+      ${cover || existingId ? `<button type="button" class="text-btn" data-action="remove-cover">Remove photo</button>` : ''}
+    </div>`;
+  hydratePhotos(field);
+}
+
+async function handleCoverFile() {
+  const input = $('#coverInput');
+  const file = input.files[0];
+  input.value = '';
+  if (!file) return;
+  try {
+    const blob = await compressImage(file);
+    if (state.editing.cover) URL.revokeObjectURL(state.editing.cover.url);
+    state.editing.cover = { blob, url: URL.createObjectURL(blob) };
+    renderCoverField();
+  } catch (err) {
+    toast(err.message);
+  }
+}
+
+function setEditCover(cover) {
+  if (state.editing.cover) URL.revokeObjectURL(state.editing.cover.url);
+  state.editing.cover = cover;
+}
+
 function fillEditForm(data, recipe) {
   editForm().innerHTML = `
+    <div class="field" id="coverField"></div>
     <label class="field"><span>Title</span><input id="fTitle" value="${esc(data.title)}" autocomplete="off"></label>
     <fieldset class="field"><legend>Category</legend>
       <div class="seg">${CATEGORIES.map(c => `<label><input type="radio" name="category" value="${c}" ${data.category === c ? 'checked' : ''}><span>${cap(c)}</span></label>`).join('')}</div>
@@ -1472,6 +1514,7 @@ function fillEditForm(data, recipe) {
     ${versionsHTML(recipe)}
     ${recipe ? `<button type="button" class="btn danger" data-action="delete-recipe">Delete recipe</button>` : ''}`;
   editForm().querySelectorAll('.step-row textarea').forEach(autosize);
+  renderCoverField();
 }
 
 // Step boxes grow with their text so long steps are fully visible while editing.
@@ -1488,8 +1531,9 @@ function openEdit(id) {
     mealPrep: '', reheat: '', notes: '',
   };
   $('#editHeading').textContent = recipe ? 'Edit recipe' : 'New recipe';
+  state.editing = { id: recipe?.id ?? null, cover: undefined };
   fillEditForm(data, recipe);
-  state.editing = { id: recipe?.id ?? null, initial: JSON.stringify(readEditForm().data) };
+  state.editing.initial = JSON.stringify(readEditForm().data);
   $('#editScroll').scrollTop = 0;
   openSheet($('#editSheet'));
 }
@@ -1569,12 +1613,23 @@ async function saveEdit() {
   } else {
     recipe = normalizeRecipe({ id: uid('r'), ...data, coverPhotoId: null, versions: [], cookLog: [] });
   }
+  const cover = state.editing.cover;
+  const photo = cover ? { id: uid('p'), type: 'image/jpeg', data: await cover.blob.arrayBuffer() } : null;
+  if (cover !== undefined) recipe.coverPhotoId = photo?.id ?? null;
   try {
-    await saveRecipe(recipe);
+    // Photo and recipe are written in one transaction so the cover can never point at a missing photo.
+    await run(['recipes', 'photos'], 'readwrite', tx => {
+      if (photo) tx.objectStore('photos').put(photo);
+      tx.objectStore('recipes').put(recipe);
+    });
   } catch (err) {
     toast(`Could not save: ${err.message}`);
     return;
   }
+  const i = state.recipes.findIndex(r => r.id === recipe.id);
+  if (i >= 0) state.recipes[i] = recipe; else state.recipes.push(recipe);
+  setEditCover(undefined);
+  if (cover !== undefined) await deleteUnusedPhotos();
   // Step numbers may have moved, so running timers for this recipe no longer match their steps.
   clearTimersFor(recipe.id);
   state.checks.delete(recipe.id);
@@ -1590,8 +1645,9 @@ async function saveEdit() {
 }
 
 function cancelEdit() {
-  const dirty = JSON.stringify(readEditForm().data) !== state.editing.initial;
+  const dirty = state.editing.cover !== undefined || JSON.stringify(readEditForm().data) !== state.editing.initial;
   if (dirty && !confirm('Discard your changes?')) return;
+  setEditCover(undefined);
   closeSheet($('#editSheet'));
 }
 
@@ -1933,6 +1989,7 @@ function wire() {
     if (choice === 'import') $('#importInput').click();
   });
   $('#importInput').addEventListener('change', importBackup);
+  $('#coverInput').addEventListener('change', handleCoverFile);
 
   $('#viewBody').addEventListener('click', e => {
     const btn = e.target.closest('[data-action]');
@@ -1984,6 +2041,8 @@ function wire() {
         break;
       }
       case 'delete-row': btn.closest('.row').remove(); renumberSteps(); break;
+      case 'choose-cover': $('#coverInput').click(); break;
+      case 'remove-cover': setEditCover(null); renderCoverField(); break;
       case 'restore-version': {
         const r = getRecipe(state.editing.id);
         const v = r.versions[Number(btn.dataset.index)];

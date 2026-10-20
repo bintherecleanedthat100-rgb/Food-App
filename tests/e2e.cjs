@@ -275,6 +275,40 @@ async function makeTestPhoto(page) {
       await page.waitForFunction(() => document.querySelector('#grid .card[data-id="chicken-shawarma-bowl"] img')?.naturalWidth === 1200);
     });
 
+    await check('a cover photo can be set and removed from Edit before cooking', async () => {
+      await page.click('.top [data-cat="beef"]');
+      await openRecipe(page, 'thai-basil-beef');
+      await page.click('#editBtn');
+      await page.waitForSelector('#editSheet.open');
+      const chooser = page.waitForEvent('filechooser');
+      await page.click('#coverField [data-action="choose-cover"]');
+      await (await chooser).setFiles(await makeTestPhoto(page));
+      await page.waitForSelector('#coverField img[src^="blob:"]');
+      await page.click('#saveEdit');
+      await page.waitForSelector('#editSheet:not(.open)', { state: 'attached' });
+      let db = await dumpDB(page);
+      let r = db.recipes.find(x => x.id === 'thai-basil-beef');
+      assert.ok(r.coverPhotoId);
+      assert.equal(r.versions.length, 0);
+      assert.ok(db.photos.some(p => p.id === r.coverPhotoId));
+      await page.waitForFunction(() => document.querySelector('#viewBody .hero img')?.naturalWidth === 1200);
+      await page.waitForFunction(() => document.querySelector('#grid .card[data-id="thai-basil-beef"] img')?.naturalWidth === 1200);
+
+      await page.click('#editBtn');
+      await page.waitForSelector('#editSheet.open');
+      await page.click('#coverField [data-action="remove-cover"]');
+      await page.click('#saveEdit');
+      await page.waitForSelector('#editSheet:not(.open)', { state: 'attached' });
+      const removedId = r.coverPhotoId;
+      db = await dumpDB(page);
+      r = db.recipes.find(x => x.id === 'thai-basil-beef');
+      assert.equal(r.coverPhotoId, null);
+      assert.ok(!db.photos.some(p => p.id === removedId));
+      assert.ok(await page.isVisible('#grid .card[data-id="thai-basil-beef"] .tile'));
+      await closeRecipe(page);
+      await page.click('.top [data-cat="chicken"]');
+    });
+
     await check('dismissing the camera still opens the log form, and a rating is required', async () => {
       await openRecipe(page, 'chicken-burrito-bowl');
       const chooser = page.waitForEvent('filechooser');
