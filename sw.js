@@ -1,6 +1,6 @@
 // Offline support: serve the app shell from cache, then refresh the cache in the background.
 // Bump CACHE when shipping changes so old files are cleared out.
-const CACHE = 'making-food-v5';
+const CACHE = 'making-food-v6';
 const SHELL = [
   './',
   './index.html',
@@ -9,26 +9,44 @@ const SHELL = [
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-maskable-512.png',
+  './photos/almond-flour-chocolate-chip-cookies.jpg',
+  './photos/bbq-chicken-potato-wedges.jpg',
+  './photos/beef-barbacoa-bowl.jpg',
+  './photos/beef-bolognese-spaghetti-squash.jpg',
   './photos/beef-bulgogi-bowl.jpg',
+  './photos/buffalo-chicken-bowl.jpg',
   './photos/burger-bowl-sweet-potato-fries.jpg',
+  './photos/carne-asada-bowl.jpg',
   './photos/chicken-burrito-bowl.jpg',
+  './photos/chicken-fried-rice.jpg',
   './photos/chicken-shawarma-bowl.jpg',
   './photos/chipotle-beef-fajita-bowl.jpg',
   './photos/chipotle-chicken-fajita-bowl.jpg',
+  './photos/chocolate-banana-nice-cream.jpg',
   './photos/cinnamon-baked-apples-walnuts.jpg',
+  './photos/classic-beef-stew.jpg',
+  './photos/cottage-pie.jpg',
+  './photos/crustless-pumpkin-pie-custard-cups.jpg',
   './photos/dark-chocolate-avocado-mousse.jpg',
+  './photos/fudgy-almond-flour-brownies.jpg',
   './photos/ginger-garlic-chicken-stir-fry.jpg',
   './photos/golden-milk-chia-pudding.jpg',
   './photos/greek-beef-bowl.jpg',
   './photos/greek-yogurt-berry-bark.jpg',
   './photos/herb-steak-brussels-sprouts.jpg',
   './photos/honey-garlic-teriyaki-chicken.jpg',
+  './photos/lemon-blueberry-almond-cake.jpg',
   './photos/lemon-herb-chicken-sweet-potatoes.jpg',
   './photos/meatballs-mashed-potatoes-gravy.jpg',
+  './photos/mediterranean-chicken-sheet-pan.jpg',
   './photos/mixed-berry-almond-crumble.jpg',
+  './photos/mongolian-beef.jpg',
+  './photos/no-bake-carrot-cake-bites.jpg',
+  './photos/no-bake-strawberry-cheesecake-jars.jpg',
   './photos/steak-bites-potato-hash.jpg',
   './photos/steak-sweet-potato-chimichurri.jpg',
   './photos/thai-basil-beef.jpg',
+  './photos/vanilla-panna-cotta-berry-sauce.jpg',
 ];
 
 self.addEventListener('install', event => {

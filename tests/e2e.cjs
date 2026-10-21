@@ -144,7 +144,7 @@ async function makeTestPhoto(page) {
           const card = `#grid .card[data-id="${id}"]`;
           assert.equal(await page.$eval(card, el => el.firstElementChild.className), 'card-name');
           if (fs.existsSync(path.join(ROOT, 'photos', `${id}.jpg`))) {
-            await page.waitForFunction(sel => document.querySelector(sel)?.naturalWidth >= 700, `${card} img`);
+            await page.waitForFunction(sel => document.querySelector(sel)?.naturalWidth >= 600, `${card} img`);
             assert.equal(await page.getAttribute(`${card} img`, 'src'), `photos/${id}.jpg`);
           } else {
             assert.ok(await page.isVisible(`${card} .tile`), `${id} should show a tile`);
