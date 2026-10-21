@@ -112,9 +112,27 @@ async function makeTestPhoto(page) {
       assert.equal((await cardIds(page)).length, 4);
     });
 
-    await check('cards without a photo show a colored tile with the name', async () => {
-      const tile = await page.textContent('#grid .card[data-id="chicken-shawarma-bowl"] .tile span');
-      assert.equal(tile, 'Chicken Shawarma Bowl');
+    await check('starter recipes show their bundled photo', async () => {
+      for (const id of await cardIds(page)) {
+        await page.waitForFunction(sel => document.querySelector(sel)?.naturalWidth > 1000, `#grid .card[data-id="${id}"] img`);
+        assert.equal(await page.getAttribute(`#grid .card[data-id="${id}"] img`, 'src'), `photos/${id}.jpg`);
+      }
+    });
+
+    await check('a new recipe without a photo shows a colored tile with its name', async () => {
+      await page.click('#addBtn');
+      await page.waitForSelector('#editSheet.open');
+      assert.ok(await page.isVisible('#coverField .photo-placeholder'));
+      await page.fill('#fTitle', 'Plain Beef Test');
+      await page.click('#editForm .seg label:has(input[value="beef"]) span');
+      await page.fill('#ingRows li:first-child .name', 'ground beef');
+      await page.fill('#stepRows li:first-child .text', 'Cook it.');
+      await page.click('#saveEdit');
+      await page.waitForSelector('#editSheet:not(.open)', { state: 'attached' });
+      await closeRecipe(page);
+      assert.equal(await page.getAttribute('.top [data-cat="beef"]', 'aria-pressed'), 'true');
+      assert.equal(await page.textContent('#grid .card .tile span'), 'Plain Beef Test');
+      await page.click('.top [data-cat="chicken"]');
     });
 
     await check('tapping a card opens that recipe', async () => {
@@ -304,7 +322,7 @@ async function makeTestPhoto(page) {
       r = db.recipes.find(x => x.id === 'thai-basil-beef');
       assert.equal(r.coverPhotoId, null);
       assert.ok(!db.photos.some(p => p.id === removedId));
-      assert.ok(await page.isVisible('#grid .card[data-id="thai-basil-beef"] .tile'));
+      assert.equal(await page.getAttribute('#grid .card[data-id="thai-basil-beef"] img', 'src'), 'photos/thai-basil-beef.jpg');
       await closeRecipe(page);
       await page.click('.top [data-cat="chicken"]');
     });

@@ -10,6 +10,7 @@ A personal recipe app for iPhone. It is one screen with a Chicken and Beef toggl
 | `sw.js` | Service worker that caches the app so it works offline |
 | `manifest.webmanifest` | Name, icons, and full-screen settings for "Add to Home Screen" |
 | `icons/` | App icons |
+| `photos/` | Starter photos for the 11 seed recipes, from Wikimedia Commons (credits in `photos/CREDITS.md`) |
 | `tests/e2e.cjs` | End-to-end checks run in headless Chromium |
 
 ## Putting it on your iPhone

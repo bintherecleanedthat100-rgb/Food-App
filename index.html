@@ -1169,6 +1169,17 @@ function setCategory(category) {
   renderGrid();
 }
 
+// The starter recipes ship with a photo (see photos/CREDITS.md) that shows until the user picks their own cover.
+const STARTER_PHOTOS = new Set(SEED_RECIPES.map(r => r.id));
+const starterPhotoURL = id => (STARTER_PHOTOS.has(id) ? `photos/${encodeURIComponent(id)}.jpg` : null);
+
+function coverHTML(r, tileExtra = '') {
+  if (r.coverPhotoId) return `<img alt="" data-photo="${esc(r.coverPhotoId)}">`;
+  const starter = starterPhotoURL(r.id);
+  if (starter) return `<img alt="" src="${starter}">`;
+  return `<div class="tile ${tileClass(r.id)} ${tileExtra}"><span>${esc(r.title)}</span></div>`;
+}
+
 function renderGrid() {
   const grid = $('#grid');
   const recipes = state.recipes
@@ -1176,9 +1187,7 @@ function renderGrid() {
     .sort((a, b) => a.title.localeCompare(b.title));
   grid.innerHTML = recipes.map(r => `
     <button type="button" class="card" data-id="${esc(r.id)}">
-      <div class="card-media">${r.coverPhotoId
-        ? `<img alt="" data-photo="${esc(r.coverPhotoId)}">`
-        : `<div class="tile ${tileClass(r.id)} ${r.title.length > 34 ? 'long' : ''}"><span>${esc(r.title)}</span></div>`}</div>
+      <div class="card-media">${coverHTML(r, r.title.length > 34 ? 'long' : '')}</div>
       <span class="card-name">${esc(r.title)}</span>
     </button>`).join('');
   const empty = $('#empty');
@@ -1239,7 +1248,7 @@ function renderView() {
   const entries = entriesNewestFirst(r);
   body.innerHTML = `
     <div class="hero">
-      ${r.coverPhotoId ? `<img alt="" data-photo="${esc(r.coverPhotoId)}">` : `<div class="tile ${tileClass(r.id)}"><span>${esc(r.title)}</span></div>`}
+      ${coverHTML(r)}
       <button type="button" class="close-btn" data-action="close-view" aria-label="Close">${ICONS.close}</button>
     </div>
     <div class="content">
@@ -1456,15 +1465,17 @@ function renderCoverField() {
   const recipe = state.editing.id ? getRecipe(state.editing.id) : null;
   const cover = state.editing.cover;
   const existingId = cover === undefined ? recipe?.coverPhotoId : null;
+  const starter = recipe ? starterPhotoURL(recipe.id) : null;
   const preview = cover ? `<img alt="" src="${cover.url}">`
     : existingId ? `<img alt="" data-photo="${esc(existingId)}">`
+    : starter ? `<img alt="" src="${starter}">`
     : `<button type="button" class="photo-placeholder" data-action="choose-cover">${ICONS.camera}Add a cover photo</button>`;
   const field = $('#coverField');
   field.innerHTML = `<span>Cover photo</span>
     <div class="log-photo">${preview}</div>
-    <p class="hint">Shown on the recipe card. Pick any picture from your Photos, or take one.</p>
+    <p class="hint">${starter && !cover && !existingId ? 'This is the starter photo. Replace it with your own from Photos, or take one.' : 'Shown on the recipe card. Pick any picture from your Photos, or take one.'}</p>
     <div class="cover-actions">
-      <button type="button" class="text-btn" data-action="choose-cover">${cover || existingId ? 'Change photo' : 'Choose photo'}</button>
+      <button type="button" class="text-btn" data-action="choose-cover">${cover || existingId || starter ? 'Change photo' : 'Choose photo'}</button>
       ${cover || existingId ? `<button type="button" class="text-btn" data-action="remove-cover">Remove photo</button>` : ''}
     </div>`;
   hydratePhotos(field);

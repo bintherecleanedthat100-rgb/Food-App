@@ -1,6 +1,6 @@
 // Offline support: serve the app shell from cache, then refresh the cache in the background.
 // Bump CACHE when shipping changes so old files are cleared out.
-const CACHE = 'making-food-v2';
+const CACHE = 'making-food-v3';
 const SHELL = [
   './',
   './index.html',
@@ -9,6 +9,17 @@ const SHELL = [
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-maskable-512.png',
+  './photos/chicken-shawarma-bowl.jpg',
+  './photos/chicken-burrito-bowl.jpg',
+  './photos/honey-garlic-teriyaki-chicken.jpg',
+  './photos/chipotle-chicken-fajita-bowl.jpg',
+  './photos/beef-bulgogi-bowl.jpg',
+  './photos/steak-sweet-potato-chimichurri.jpg',
+  './photos/thai-basil-beef.jpg',
+  './photos/steak-bites-potato-hash.jpg',
+  './photos/meatballs-mashed-potatoes-gravy.jpg',
+  './photos/chipotle-beef-fajita-bowl.jpg',
+  './photos/greek-beef-bowl.jpg',
 ];
 
 self.addEventListener('install', event => {
