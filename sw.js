@@ -1,6 +1,6 @@
 // Offline support: serve the app shell from cache, then refresh the cache in the background.
 // Bump CACHE when shipping changes so old files are cleared out.
-const CACHE = 'making-food-v4';
+const CACHE = 'making-food-v5';
 const SHELL = [
   './',
   './index.html',

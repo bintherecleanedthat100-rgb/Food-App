@@ -45,13 +45,19 @@ const dumpDB = page => page.evaluate(async () => {
 const cardIds = page => page.$$eval('#grid .card', cards => cards.map(c => c.dataset.id));
 
 const CHICKEN = [
-  'chicken-burrito-bowl', 'chicken-shawarma-bowl', 'chipotle-chicken-fajita-bowl', 'ginger-garlic-chicken-stir-fry',
-  'golden-turmeric-chicken-bowl', 'honey-garlic-teriyaki-chicken', 'lemon-herb-chicken-sweet-potatoes', 'walnut-pesto-chicken-zucchini',
+  'bbq-chicken-potato-wedges', 'buffalo-chicken-bowl', 'chicken-burrito-bowl', 'chicken-caesar-salad-bowl',
+  'chicken-fried-rice', 'chicken-shawarma-bowl', 'chicken-tikka-masala', 'chipotle-chicken-fajita-bowl',
+  'coconut-curry-chicken', 'garlic-butter-chicken-asparagus', 'ginger-garlic-chicken-stir-fry', 'golden-turmeric-chicken-bowl',
+  'greek-chicken-souvlaki-bowl', 'honey-garlic-teriyaki-chicken', 'jerk-chicken-coconut-rice', 'lemon-herb-chicken-sweet-potatoes',
+  'mediterranean-chicken-sheet-pan', 'walnut-pesto-chicken-zucchini',
 ];
 const BEEF = [
-  'beef-bulgogi-bowl', 'burger-bowl-sweet-potato-fries', 'chipotle-beef-fajita-bowl', 'ginger-beef-broccoli', 'greek-beef-bowl',
-  'herb-steak-brussels-sprouts', 'meatballs-mashed-potatoes-gravy', 'steak-bites-potato-hash', 'steak-sweet-potato-chimichurri',
-  'thai-basil-beef', 'turmeric-beef-sweet-potato-skillet',
+  'beef-barbacoa-bowl', 'beef-bolognese-spaghetti-squash', 'beef-bulgogi-bowl', 'beef-stroganoff-mashed-potatoes',
+  'beef-taco-salad-bowl', 'burger-bowl-sweet-potato-fries', 'carne-asada-bowl', 'chipotle-beef-fajita-bowl',
+  'classic-beef-stew', 'cottage-pie', 'ginger-beef-broccoli', 'greek-beef-bowl',
+  'herb-steak-brussels-sprouts', 'korean-ground-beef-bowl', 'meatballs-mashed-potatoes-gravy', 'mongolian-beef',
+  'philly-cheesesteak-bowl', 'steak-bites-potato-hash', 'steak-sweet-potato-chimichurri', 'thai-basil-beef',
+  'turmeric-beef-sweet-potato-skillet',
 ];
 const ORIGINAL = [
   'chicken-burrito-bowl', 'chicken-shawarma-bowl', 'chipotle-chicken-fajita-bowl', 'honey-garlic-teriyaki-chicken',
@@ -59,8 +65,10 @@ const ORIGINAL = [
   'steak-bites-potato-hash', 'steak-sweet-potato-chimichurri', 'thai-basil-beef',
 ];
 const DESSERT = [
-  'cinnamon-baked-apples-walnuts', 'dark-chocolate-avocado-mousse', 'golden-milk-chia-pudding', 'greek-yogurt-berry-bark',
-  'mixed-berry-almond-crumble',
+  'almond-flour-chocolate-chip-cookies', 'chocolate-banana-nice-cream', 'cinnamon-baked-apples-walnuts', 'crustless-pumpkin-pie-custard-cups',
+  'dark-chocolate-avocado-mousse', 'dark-chocolate-coconut-macaroons', 'fudgy-almond-flour-brownies', 'golden-milk-chia-pudding',
+  'greek-yogurt-berry-bark', 'lemon-blueberry-almond-cake', 'mango-lime-sorbet', 'mixed-berry-almond-crumble',
+  'no-bake-carrot-cake-bites', 'no-bake-strawberry-cheesecake-jars', 'vanilla-panna-cotta-berry-sauce',
 ];
 const firstIngredient = page => page.textContent('#ingredientList li:first-child .ing-text');
 
@@ -117,7 +125,7 @@ async function makeTestPhoto(page) {
   try {
     const { context, page, errors } = await newPage(browser, base);
 
-    await check('seeds 8 chicken, 11 beef, and 5 dessert recipes; toggle filters', async () => {
+    await check('seeds 18 chicken, 21 beef, and 15 dessert recipes; toggle filters', async () => {
       assert.deepEqual((await cardIds(page)).sort(), CHICKEN);
       await page.click('.top [data-cat="beef"]');
       assert.equal(await page.getAttribute('.top [data-cat="beef"]', 'aria-pressed'), 'true');
