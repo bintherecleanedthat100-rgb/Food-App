@@ -1,6 +1,6 @@
 # Making Food
 
-A personal recipe app for iPhone. It is one screen with a Chicken and Beef toggle, recipe cards, a cook log with photos, and step timers. It runs as a home-screen web app (PWA). There is no App Store, no account, and no server. Everything is stored on the phone.
+A personal recipe app for iPhone. It is one screen with a Chicken, Beef, and Desserts toggle, recipe cards, a cook log with photos, and step timers. It runs as a home-screen web app (PWA). There is no App Store, no account, and no server. Everything is stored on the phone.
 
 ## Files
 
@@ -10,7 +10,7 @@ A personal recipe app for iPhone. It is one screen with a Chicken and Beef toggl
 | `sw.js` | Service worker that caches the app so it works offline |
 | `manifest.webmanifest` | Name, icons, and full-screen settings for "Add to Home Screen" |
 | `icons/` | App icons |
-| `photos/` | Starter photos for the 11 seed recipes, from Wikimedia Commons (credits in `photos/CREDITS.md`) |
+| `photos/` | Openly licensed starter photos for the seed recipes (sources and credits in `photos/CREDITS.md`) |
 | `tests/e2e.cjs` | End-to-end checks run in headless Chromium |
 
 ## Putting it on your iPhone

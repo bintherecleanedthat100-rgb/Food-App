@@ -43,6 +43,25 @@ const dumpDB = page => page.evaluate(async () => {
 });
 
 const cardIds = page => page.$$eval('#grid .card', cards => cards.map(c => c.dataset.id));
+
+const CHICKEN = [
+  'chicken-burrito-bowl', 'chicken-shawarma-bowl', 'chipotle-chicken-fajita-bowl', 'ginger-garlic-chicken-stir-fry',
+  'golden-turmeric-chicken-bowl', 'honey-garlic-teriyaki-chicken', 'lemon-herb-chicken-sweet-potatoes', 'walnut-pesto-chicken-zucchini',
+];
+const BEEF = [
+  'beef-bulgogi-bowl', 'burger-bowl-sweet-potato-fries', 'chipotle-beef-fajita-bowl', 'ginger-beef-broccoli', 'greek-beef-bowl',
+  'herb-steak-brussels-sprouts', 'meatballs-mashed-potatoes-gravy', 'steak-bites-potato-hash', 'steak-sweet-potato-chimichurri',
+  'thai-basil-beef', 'turmeric-beef-sweet-potato-skillet',
+];
+const ORIGINAL = [
+  'chicken-burrito-bowl', 'chicken-shawarma-bowl', 'chipotle-chicken-fajita-bowl', 'honey-garlic-teriyaki-chicken',
+  'beef-bulgogi-bowl', 'chipotle-beef-fajita-bowl', 'greek-beef-bowl', 'meatballs-mashed-potatoes-gravy',
+  'steak-bites-potato-hash', 'steak-sweet-potato-chimichurri', 'thai-basil-beef',
+];
+const DESSERT = [
+  'cinnamon-baked-apples-walnuts', 'dark-chocolate-avocado-mousse', 'golden-milk-chia-pudding', 'greek-yogurt-berry-bark',
+  'mixed-berry-almond-crumble',
+];
 const firstIngredient = page => page.textContent('#ingredientList li:first-child .ing-text');
 
 let passed = 0;
@@ -98,25 +117,33 @@ async function makeTestPhoto(page) {
   try {
     const { context, page, errors } = await newPage(browser, base);
 
-    await check('seeds 4 chicken and 7 beef recipes; toggle filters', async () => {
-      assert.deepEqual((await cardIds(page)).sort(), [
-        'chicken-burrito-bowl', 'chicken-shawarma-bowl', 'chipotle-chicken-fajita-bowl', 'honey-garlic-teriyaki-chicken',
-      ]);
+    await check('seeds 8 chicken, 11 beef, and 5 dessert recipes; toggle filters', async () => {
+      assert.deepEqual((await cardIds(page)).sort(), CHICKEN);
       await page.click('.top [data-cat="beef"]');
       assert.equal(await page.getAttribute('.top [data-cat="beef"]', 'aria-pressed'), 'true');
-      assert.deepEqual((await cardIds(page)).sort(), [
-        'beef-bulgogi-bowl', 'chipotle-beef-fajita-bowl', 'greek-beef-bowl', 'meatballs-mashed-potatoes-gravy',
-        'steak-bites-potato-hash', 'steak-sweet-potato-chimichurri', 'thai-basil-beef',
-      ]);
+      assert.deepEqual((await cardIds(page)).sort(), BEEF);
+      await page.click('.top [data-cat="dessert"]');
+      assert.equal(await page.getAttribute('.top [data-cat="dessert"]', 'aria-pressed'), 'true');
+      assert.deepEqual((await cardIds(page)).sort(), DESSERT);
       await page.click('.top [data-cat="chicken"]');
-      assert.equal((await cardIds(page)).length, 4);
+      assert.equal((await cardIds(page)).length, CHICKEN.length);
     });
 
-    await check('starter recipes show their bundled photo', async () => {
-      for (const id of await cardIds(page)) {
-        await page.waitForFunction(sel => document.querySelector(sel)?.naturalWidth > 1000, `#grid .card[data-id="${id}"] img`);
-        assert.equal(await page.getAttribute(`#grid .card[data-id="${id}"] img`, 'src'), `photos/${id}.jpg`);
+    await check('starter recipes show their bundled photo, others a title tile, with the title above', async () => {
+      for (const cat of ['chicken', 'beef', 'dessert']) {
+        await page.click(`.top [data-cat="${cat}"]`);
+        for (const id of await cardIds(page)) {
+          const card = `#grid .card[data-id="${id}"]`;
+          assert.equal(await page.$eval(card, el => el.firstElementChild.className), 'card-name');
+          if (fs.existsSync(path.join(ROOT, 'photos', `${id}.jpg`))) {
+            await page.waitForFunction(sel => document.querySelector(sel)?.naturalWidth >= 700, `${card} img`);
+            assert.equal(await page.getAttribute(`${card} img`, 'src'), `photos/${id}.jpg`);
+          } else {
+            assert.ok(await page.isVisible(`${card} .tile`), `${id} should show a tile`);
+          }
+        }
       }
+      await page.click('.top [data-cat="chicken"]');
     });
 
     await check('a new recipe without a photo shows a colored tile with its name', async () => {
@@ -131,7 +158,7 @@ async function makeTestPhoto(page) {
       await page.waitForSelector('#editSheet:not(.open)', { state: 'attached' });
       await closeRecipe(page);
       assert.equal(await page.getAttribute('.top [data-cat="beef"]', 'aria-pressed'), 'true');
-      assert.equal(await page.textContent('#grid .card .tile span'), 'Plain Beef Test');
+      assert.ok(await page.isVisible('#grid .card:has(.card-name:text-is("Plain Beef Test")) .tile'));
       await page.click('.top [data-cat="chicken"]');
     });
 
@@ -394,7 +421,8 @@ async function makeTestPhoto(page) {
       await context.setOffline(true);
       await page.reload();
       await page.waitForSelector('#grid .card');
-      assert.equal((await cardIds(page)).length, 4);
+      assert.equal((await cardIds(page)).length, CHICKEN.length);
+      await page.waitForFunction(() => document.querySelector('#grid .card[data-id="chicken-burrito-bowl"] img')?.naturalWidth > 0);
       await context.setOffline(false);
     });
 
@@ -402,6 +430,30 @@ async function makeTestPhoto(page) {
       assert.deepEqual(errors, []);
     });
     await context.close();
+
+    await check('an install from before the new recipes gets them, without reviving deleted ones', async () => {
+      const old = await newPage(browser, base);
+      // Recreate an original install: only the first 11 recipes, one of them deleted, and no seedVersion yet.
+      await old.page.evaluate(async ([newIds]) => {
+        const db = await new Promise(resolve => { const req = indexedDB.open('making-food'); req.onsuccess = () => resolve(req.result); });
+        await new Promise((resolve, reject) => {
+          const tx = db.transaction(['recipes', 'meta'], 'readwrite');
+          [...newIds, 'greek-beef-bowl'].forEach(id => tx.objectStore('recipes').delete(id));
+          tx.objectStore('meta').delete('seedVersion');
+          tx.oncomplete = resolve; tx.onerror = () => reject(tx.error);
+        });
+        db.close();
+      }, [[...CHICKEN, ...BEEF, ...DESSERT].filter(id => !ORIGINAL.includes(id))]);
+      await old.page.reload();
+      await old.page.waitForSelector('#grid .card');
+      const ids = (await dumpDB(old.page)).recipes.map(r => r.id).sort();
+      assert.deepEqual(ids, [...CHICKEN, ...BEEF, ...DESSERT].filter(id => id !== 'greek-beef-bowl').sort());
+      await old.page.reload();
+      await old.page.waitForSelector('#grid .card');
+      assert.equal((await dumpDB(old.page)).recipes.length, ids.length);
+      assert.deepEqual(old.errors, []);
+      await old.context.close();
+    });
 
     // Timers use a fake clock so a 5-minute countdown can be checked in milliseconds.
     const timerCtx = await browser.newContext({ viewport: { width: 390, height: 844 } });

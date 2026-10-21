@@ -74,7 +74,9 @@ svg { display: block; }
   -webkit-backdrop-filter: saturate(1.6) blur(14px);
   backdrop-filter: saturate(1.6) blur(14px);
 }
-.seg { display: flex; width: min(100%, 220px); padding: 3px; border-radius: 12px; background: var(--surface-2); }
+.seg { display: flex; width: min(100%, 300px); padding: 3px; border-radius: 12px; background: var(--surface-2); }
+/* Leaves room for the menu button on the right on narrow phones. */
+.top .seg { width: min(calc(100% - 96px), 300px); }
 .seg button, .seg label { flex: 1; }
 .seg button, .seg span {
   display: flex; align-items: center; justify-content: center;
@@ -103,6 +105,8 @@ svg { display: block; }
 .card-media img { width: 100%; height: 100%; object-fit: cover; }
 .card-name {
   font-size: 15px; font-weight: 600; line-height: 1.25;
+  /* Titles sit above the photo; reserving two lines keeps the photos in both columns aligned. */
+  min-height: 2.5em;
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
 }
 .tile {
@@ -305,6 +309,7 @@ svg { display: block; }
   <div class="seg" role="group" aria-label="Category">
     <button type="button" data-cat="chicken" aria-pressed="true">Chicken</button>
     <button type="button" data-cat="beef" aria-pressed="false">Beef</button>
+    <button type="button" data-cat="dessert" aria-pressed="false">Desserts</button>
   </div>
   <button type="button" class="menu-btn" id="menuBtn" aria-label="More"></button>
 </header>
@@ -830,6 +835,455 @@ const SEED_RECIPES = [
     mealPrep: 'Pack the rice and kofta together. Keep the salad, feta, and tzatziki in separate containers. If liquid collects on top of the tzatziki, pour it off and stir. Refrigerate everything up to 4 days. The kofta and rice freeze for up to 3 months.',
     reheat: 'Air fry the kofta at 350°F for 5 to 6 minutes, flipping once, until hot in the center (165°F). Microwave the rice separately, covered, with a splash of water. Serve the salad and tzatziki cold.',
   },
+
+  // Seed version 2: anti-inflammatory meals and desserts (turmeric with black pepper, ginger,
+  // garlic, olive oil, leafy and cruciferous greens, berries, walnuts, cinnamon, dark chocolate).
+  {
+    id: 'golden-turmeric-chicken-bowl',
+    since: 2,
+    title: 'Golden Turmeric Chicken Bowl',
+    category: 'chicken',
+    baseServings: 4,
+    ingredients: [
+      I(3, 'lb', 'boneless skinless chicken thighs'),
+      I(3, 'tbsp', 'extra virgin olive oil'),
+      I(2, 'tbsp', 'fresh lemon juice'),
+      I(2, 'tsp', 'ground turmeric'),
+      I(1, 'tbsp', 'fresh ginger, grated'),
+      I(4, 'clove', 'garlic, minced'),
+      I(1, 'tsp', 'ground cumin'),
+      I(1, 'tsp', 'smoked paprika'),
+      I(2, 'tsp', 'kosher salt'),
+      I(1, 'tsp', 'black pepper (pairs with the turmeric)'),
+      I(2, 'cup', 'jasmine rice, uncooked'),
+      I(3, 'cup', 'chicken broth'),
+      I(1, 'tbsp', 'butter'),
+      I(1/2, 'tsp', 'ground turmeric (for the rice)'),
+      I(1.5, 'lb', 'broccoli florets'),
+      I(1, 'tbsp', 'avocado oil (for the broccoli)'),
+      I(1/2, 'tsp', 'kosher salt (for the broccoli)'),
+      I(2, 'cup', 'baby spinach'),
+      I(1, '', 'avocado, sliced'),
+      I(3/4, 'cup', 'plain whole-milk Greek yogurt (lemon herb sauce)'),
+      I(1, 'tbsp', 'fresh lemon juice (lemon herb sauce)'),
+      I(2, 'tbsp', 'fresh parsley or cilantro, chopped (lemon herb sauce)'),
+      I(1/4, 'tsp', 'kosher salt (lemon herb sauce)'),
+    ],
+    steps: [
+      S('Whisk the olive oil, lemon juice, turmeric, ginger, garlic, cumin, paprika, salt, and pepper. Coat the chicken and marinate in the fridge for at least 30 minutes. Turmeric stains, so use a glass or steel bowl.', 30),
+      S('Rinse the rice. Bring the rice, broth, butter, and 1/2 tsp turmeric to a boil, then cover, turn the heat to low, and simmer.', 15),
+      S('Take the rice off the heat and let it steam, covered. Fluff with a fork.', 10),
+      S('Air fry the chicken at 380°F in a single layer (in batches), flipping halfway, until 165°F inside.', 20),
+      S('Toss the broccoli with avocado oil and salt. Air fry at 390°F, shaking once, until tender with browned edges.', 10),
+      S('Rest the chicken, then slice.', 5),
+      S('Stir together the yogurt, lemon juice, herbs, and salt for the sauce.'),
+      S('Build bowls: a handful of spinach, golden rice, chicken, broccoli, and avocado. Spoon the lemon herb sauce over the top.'),
+    ],
+    mealPrep: 'Pack the rice, chicken, and broccoli together with the spinach underneath; it wilts a little, which is fine. Keep the sauce separate and slice the avocado fresh. Refrigerate up to 4 days. The chicken and rice freeze for up to 3 months.',
+    reheat: 'Air fry the chicken and broccoli at 375°F for 4 to 6 minutes, shaking once, until hot throughout (165°F). Microwave the rice separately, covered, with a splash of water. Add the sauce and avocado after reheating.',
+  },
+  {
+    id: 'lemon-herb-chicken-sweet-potatoes',
+    since: 2,
+    title: 'Lemon Herb Chicken with Sweet Potatoes and Spinach',
+    category: 'chicken',
+    baseServings: 4,
+    ingredients: [
+      I(3, 'lb', 'boneless skinless chicken thighs'),
+      I(3, 'tbsp', 'extra virgin olive oil'),
+      I(1, '', 'lemon, zested and juiced'),
+      I(4, 'clove', 'garlic, minced'),
+      I(1, 'tbsp', 'fresh rosemary, chopped (or 1 tsp dried)'),
+      I(1, 'tbsp', 'fresh thyme leaves (or 1 tsp dried)'),
+      I(1, 'tsp', 'dried oregano'),
+      I(2, 'tsp', 'kosher salt'),
+      I(1, 'tsp', 'black pepper'),
+      I(2, 'lb', 'sweet potatoes, cut into 1-inch cubes'),
+      I(2, 'tbsp', 'avocado oil (for the sweet potatoes)'),
+      I(1, 'tsp', 'kosher salt (for the sweet potatoes)'),
+      I(1/2, 'tsp', 'ground cinnamon'),
+      I(6, 'oz', 'baby spinach'),
+      I(1, 'tbsp', 'extra virgin olive oil (for the spinach)'),
+      I(2, 'clove', 'garlic, sliced (for the spinach)'),
+      I(1/4, 'cup', 'walnuts, toasted and chopped'),
+      I(2, 'tbsp', 'fresh parsley, chopped'),
+    ],
+    steps: [
+      S('Whisk the olive oil, lemon zest and juice, minced garlic, rosemary, thyme, oregano, salt, and pepper. Coat the chicken and marinate in the fridge for at least 30 minutes.', 30),
+      S('Toss the sweet potatoes with avocado oil, salt, and cinnamon. Air fry at 400°F, shaking halfway, until tender and caramelized.', 20),
+      S('Air fry the chicken at 380°F in a single layer (in batches), flipping halfway, until 165°F inside.', 20),
+      S('Rest the chicken, then slice.', 5),
+      S('Warm the olive oil in a large skillet over medium heat. Add the sliced garlic, then the spinach, and toss just until wilted. Season with a pinch of salt.', 2),
+      S('Plate the chicken over the spinach with the sweet potatoes. Top with walnuts and parsley.'),
+    ],
+    mealPrep: 'Pack the chicken, sweet potatoes, and spinach together. Keep the walnuts in a small bag so they stay crunchy. Refrigerate up to 4 days. The chicken and sweet potatoes freeze for up to 3 months; the spinach is best fresh.',
+    reheat: 'Air fry the chicken and sweet potatoes at 375°F for 5 to 6 minutes, shaking once, until hot throughout (165°F). Warm the spinach in the microwave for 30 to 60 seconds. Add the walnuts after reheating.',
+  },
+  {
+    id: 'ginger-garlic-chicken-stir-fry',
+    since: 2,
+    title: 'Ginger Garlic Chicken Stir-Fry with Bok Choy',
+    category: 'chicken',
+    baseServings: 4,
+    ingredients: [
+      I(3, 'lb', 'boneless skinless chicken thighs, cut into 1-inch pieces'),
+      I(1, 'tbsp', 'arrowroot powder (for coating)'),
+      I(1, 'tsp', 'kosher salt'),
+      I(2, 'tbsp', 'avocado oil, divided'),
+      I(1, 'lb', 'broccoli florets'),
+      I(1, 'lb', 'baby bok choy, halved'),
+      I(1, '', 'red bell pepper, sliced'),
+      I(2, 'tbsp', 'fresh ginger, grated'),
+      I(6, 'clove', 'garlic, minced'),
+      I(1/3, 'cup', 'coconut aminos or soy sauce (sauce)'),
+      I(1/4, 'cup', 'chicken broth (sauce)'),
+      I(1, 'tbsp', 'honey (sauce)'),
+      I(1, 'tbsp', 'rice vinegar (sauce)'),
+      I(1, 'tsp', 'ground turmeric (sauce)'),
+      I(1, 'tbsp', 'arrowroot powder (sauce)'),
+      I(2, 'tbsp', 'cold water (sauce)'),
+      I(2, 'cup', 'jasmine rice, uncooked'),
+      I(3, 'cup', 'water (for the rice)'),
+      I(4, '', 'green onions, sliced'),
+      I(1, 'tbsp', 'toasted sesame seeds'),
+    ],
+    steps: [
+      S('Rinse the rice. Bring the rice and 3 cups water to a boil, then cover, turn the heat to low, and simmer.', 15),
+      S('Take the rice off the heat and let it steam, covered. Fluff with a fork.', 10),
+      S('Toss the chicken with 1 tbsp arrowroot and the salt.'),
+      S('Heat 1 tbsp avocado oil in a large skillet or wok over high heat. Cook the chicken in batches in a single layer, turning once, until browned and 165°F inside. Move it to a plate.', 7),
+      S('Add the remaining avocado oil, the broccoli, and 2 tbsp water. Cover and steam until bright green.', 3),
+      S('Add the bok choy, bell pepper, ginger, and garlic, and stir-fry until the bok choy is just tender.', 3),
+      S('Stir together the coconut aminos, broth, honey, rice vinegar, and turmeric. Stir the arrowroot into the cold water. Return the chicken to the pan, add the sauce, bring to a simmer, then stir in the arrowroot mixture and cook just until glossy (arrowroot thins out if it boils too long).', 1),
+      S('Serve over rice with green onions and sesame seeds.'),
+    ],
+    mealPrep: 'Divide the rice and stir-fry into 4 containers. Refrigerate up to 4 days, or freeze the chicken and rice for up to 3 months. The bok choy softens after freezing, so it is best eaten from the fridge.',
+    reheat: 'Air fry the chicken and vegetables in a small oven-safe dish at 375°F for 4 to 6 minutes, stirring once, until hot throughout (165°F). Microwave the rice separately, covered, with a splash of water.',
+  },
+  {
+    id: 'walnut-pesto-chicken-zucchini',
+    since: 2,
+    title: 'Walnut Pesto Chicken with Zucchini and Tomatoes',
+    category: 'chicken',
+    baseServings: 4,
+    ingredients: [
+      I(3, 'lb', 'boneless skinless chicken thighs'),
+      I(1, 'tbsp', 'avocado oil'),
+      I(2, 'tsp', 'kosher salt'),
+      I(1, 'tsp', 'black pepper'),
+      I(1, 'tsp', 'garlic powder'),
+      I(2, 'cup', 'fresh basil leaves, packed (pesto)'),
+      I(1/3, 'cup', 'walnuts (pesto)'),
+      I(1/2, 'cup', 'Parmesan, grated (pesto)'),
+      I(2, 'clove', 'garlic (pesto)'),
+      I(1, 'tbsp', 'fresh lemon juice (pesto)'),
+      I(1/2, 'cup', 'extra virgin olive oil (pesto)'),
+      I(1/4, 'tsp', 'kosher salt (pesto)'),
+      I(1.5, 'lb', 'zucchini, halved lengthwise and sliced'),
+      I(1, 'pint', 'cherry tomatoes'),
+      I(1, 'tbsp', 'extra virgin olive oil (for the vegetables)'),
+      I(1/2, 'tsp', 'kosher salt (for the vegetables)'),
+      I(1.5, 'lb', 'cauliflower rice, fresh or frozen'),
+      I(1, 'tbsp', 'butter (for the cauliflower rice)'),
+    ],
+    steps: [
+      S('Pat the chicken dry and rub it with the avocado oil, salt, pepper, and garlic powder.'),
+      S('Air fry the chicken at 380°F in a single layer (in batches), flipping halfway, until 165°F inside.', 20),
+      S('Blend the basil, walnuts, Parmesan, garlic, lemon juice, and salt in a food processor, then stream in the olive oil until smooth.'),
+      S('Toss the zucchini and tomatoes with olive oil and salt. Air fry at 400°F, shaking halfway, until the zucchini browns and the tomatoes blister.', 10),
+      S('Melt the butter in a large skillet over medium-high heat and cook the cauliflower rice with a pinch of salt, stirring, until tender and any liquid cooks off.', 6),
+      S('Rest the chicken, then slice and toss with half the pesto.', 5),
+      S('Serve the chicken over the cauliflower rice with the zucchini and tomatoes, and spoon the rest of the pesto on top.'),
+    ],
+    mealPrep: 'Pack the chicken, vegetables, and cauliflower rice together, with extra pesto in a small container. Refrigerate up to 4 days. Freeze leftover pesto in an ice cube tray for up to 3 months.',
+    reheat: 'Air fry the chicken and vegetables at 375°F for 4 to 6 minutes until hot throughout (165°F). Microwave the cauliflower rice separately. Add the pesto after reheating so the basil stays bright.',
+  },
+  {
+    id: 'ginger-beef-broccoli',
+    since: 2,
+    title: 'Ginger Beef and Broccoli',
+    category: 'beef',
+    baseServings: 4,
+    ingredients: [
+      I(3, 'lb', 'flank steak, sliced thin against the grain'),
+      I(2, 'tbsp', 'arrowroot powder (for coating)'),
+      I(1, 'tsp', 'kosher salt'),
+      I(2, 'tbsp', 'avocado oil or beef tallow, divided'),
+      I(2, 'lb', 'broccoli florets'),
+      I(2, 'tbsp', 'fresh ginger, grated'),
+      I(6, 'clove', 'garlic, minced'),
+      I(1/2, 'cup', 'coconut aminos or soy sauce (sauce)'),
+      I(1/3, 'cup', 'beef broth (sauce)'),
+      I(2, 'tbsp', 'honey (sauce)'),
+      I(1, 'tbsp', 'rice vinegar (sauce)'),
+      I(1/2, 'tsp', 'red pepper flakes, optional (sauce)'),
+      I(1, 'tbsp', 'arrowroot powder (sauce)'),
+      I(2, 'tbsp', 'cold water (sauce)'),
+      I(2, 'cup', 'jasmine rice, uncooked'),
+      I(3, 'cup', 'water (for the rice)'),
+      I(3, '', 'green onions, sliced'),
+      I(1, 'tbsp', 'toasted sesame seeds'),
+    ],
+    steps: [
+      S('Rinse the rice. Bring the rice and 3 cups water to a boil, then cover, turn the heat to low, and simmer.', 15),
+      S('Take the rice off the heat and let it steam, covered. Fluff with a fork.', 10),
+      S('Toss the sliced beef with 2 tbsp arrowroot and the salt.'),
+      S('Heat 1 tbsp oil in a large skillet or wok over high heat. Sear the beef in a single layer until browned and cooked through, then move it to a plate. Repeat in batches.', 2),
+      S('Add the remaining oil, the broccoli, and 1/4 cup water. Cover and steam until bright green and crisp-tender.', 4),
+      S('Add the ginger and garlic and stir until fragrant.', 1),
+      S('Whisk the coconut aminos, broth, honey, rice vinegar, and red pepper flakes. Stir the arrowroot into the cold water. Return the beef, add the sauce, bring to a simmer, then stir in the arrowroot mixture and cook just until glossy.', 1),
+      S('Serve over rice with green onions and sesame seeds.'),
+    ],
+    mealPrep: 'Divide the rice and beef and broccoli into 4 containers. Refrigerate up to 4 days, or freeze for up to 3 months. The sauce may thin a little in storage; that is normal with arrowroot.',
+    reheat: 'Air fry the beef and broccoli in a small oven-safe dish at 350°F for 3 to 4 minutes, stirring once, until hot throughout (165°F). Microwave the rice separately, covered, with a splash of water.',
+  },
+  {
+    id: 'burger-bowl-sweet-potato-fries',
+    since: 2,
+    title: 'Burger Bowl with Avocado and Sweet Potato Fries',
+    category: 'beef',
+    baseServings: 4,
+    ingredients: [
+      I(3, 'lb', 'ground beef (85/15, grass-fed if you can)'),
+      I(2, 'tsp', 'kosher salt'),
+      I(1, 'tsp', 'black pepper'),
+      I(1, 'tsp', 'garlic powder'),
+      I(1, 'tsp', 'onion powder'),
+      I(1, 'tsp', 'smoked paprika'),
+      I(2, 'lb', 'sweet potatoes, cut into 1/2-inch fries'),
+      I(2, 'tbsp', 'avocado oil'),
+      I(2, 'tsp', 'arrowroot powder (for crisp fries)'),
+      I(1, 'tsp', 'kosher salt (for the fries)'),
+      I(1, 'head', 'romaine, chopped'),
+      I(1, 'pint', 'cherry tomatoes, halved'),
+      I(1/2, '', 'red onion, thinly sliced'),
+      I(2, '', 'avocados, sliced'),
+      I(1, 'cup', 'dill pickles, chopped'),
+      I(4, 'oz', 'sharp cheddar, sliced (optional)'),
+      I(1/2, 'cup', 'plain whole-milk Greek yogurt (sauce)'),
+      I(2, 'tbsp', 'tomato paste (sauce)'),
+      I(1, 'tsp', 'honey (sauce)'),
+      I(1, 'tbsp', 'dill pickle brine (sauce)'),
+      I(1, 'tsp', 'yellow mustard (sauce)'),
+      I(1/2, 'tsp', 'smoked paprika (sauce)'),
+    ],
+    steps: [
+      S('Toss the sweet potato fries with avocado oil, arrowroot, and salt. Air fry at 400°F in a single layer (in batches), shaking every 5 minutes, until crisp.', 18),
+      S('Mix the beef with the salt, pepper, garlic powder, onion powder, and paprika. Shape into 8 patties about 3/4 inch thick and press a dimple into the center of each so they cook flat.'),
+      S('Air fry the patties at 375°F in a single layer (in batches), flipping halfway, until 160°F inside. Add cheese for the last minute if using.', 10),
+      S('Whisk the yogurt, tomato paste, honey, pickle brine, mustard, and paprika for the sauce.'),
+      S('Build bowls: romaine, tomatoes, red onion, pickles, avocado, two patties each, and sweet potato fries. Drizzle with the sauce.'),
+    ],
+    mealPrep: 'Pack the patties and fries together and the salad separately. Keep the sauce in a small container and slice the avocado fresh. Refrigerate up to 4 days. Cooked patties freeze for up to 3 months.',
+    reheat: 'Air fry the patties at 350°F for 4 to 6 minutes until hot in the center (165°F). Air fry the fries at 400°F for 3 to 4 minutes to crisp them back up. Serve the salad cold.',
+  },
+  {
+    id: 'turmeric-beef-sweet-potato-skillet',
+    since: 2,
+    title: 'Turmeric Beef and Sweet Potato Skillet with Kale',
+    category: 'beef',
+    baseServings: 4,
+    ingredients: [
+      I(3, 'lb', 'ground beef (85/15)'),
+      I(1, 'tbsp', 'avocado oil or beef tallow'),
+      I(1.5, 'lb', 'sweet potatoes, cut into 1/2-inch cubes'),
+      I(1, '', 'yellow onion, diced'),
+      I(4, 'clove', 'garlic, minced'),
+      I(1, 'tbsp', 'fresh ginger, grated'),
+      I(2, 'tsp', 'ground turmeric'),
+      I(2, 'tsp', 'ground cumin'),
+      I(1, 'tsp', 'smoked paprika'),
+      I(1/2, 'tsp', 'ground cinnamon'),
+      I(2.5, 'tsp', 'kosher salt'),
+      I(1, 'tsp', 'black pepper'),
+      I(1/2, 'cup', 'beef broth'),
+      I(1, 'bunch', 'lacinato kale, stems removed, chopped'),
+      I(1, '', 'avocado, diced'),
+      I(1/4, 'cup', 'fresh cilantro, chopped'),
+      I(1, '', 'lime, cut into wedges'),
+    ],
+    steps: [
+      S('Heat the oil in a large, deep skillet over medium-high heat. Add the sweet potatoes in an even layer and cook, stirring now and then, until browned on the edges.', 8),
+      S('Add the beef and onion, breaking up the beef, and cook until no pink remains and it reads 160°F.', 9),
+      S('Stir in the garlic, ginger, turmeric, cumin, paprika, cinnamon, salt, and pepper and cook until fragrant.', 1),
+      S('Pour in the broth, cover, and simmer over medium-low until the sweet potatoes are tender.', 8),
+      S('Stir in the kale and cook uncovered until it wilts and most of the liquid is gone.', 3),
+      S('Serve topped with avocado, cilantro, and a squeeze of lime.'),
+    ],
+    mealPrep: 'Divide into 4 containers. Add the avocado, cilantro, and lime the day you eat it. Refrigerate up to 4 days or freeze for up to 3 months.',
+    reheat: 'Air fry in a small oven-safe dish at 350°F for 5 to 7 minutes, stirring once, until hot throughout (165°F). Or microwave, covered, stirring halfway.',
+  },
+  {
+    id: 'herb-steak-brussels-sprouts',
+    since: 2,
+    title: 'Herb Steak with Roasted Brussels Sprouts and Carrots',
+    category: 'beef',
+    baseServings: 4,
+    ingredients: [
+      I(3, 'lb', 'sirloin or strip steaks, about 1 inch thick'),
+      I(2, 'tsp', 'kosher salt'),
+      I(1, 'tsp', 'black pepper'),
+      I(1, 'tbsp', 'avocado oil or beef tallow'),
+      I(4, 'tbsp', 'butter, softened (herb butter)'),
+      I(2, 'tbsp', 'fresh parsley, finely chopped (herb butter)'),
+      I(1, 'tbsp', 'fresh rosemary, finely chopped (herb butter)'),
+      I(2, 'clove', 'garlic, grated (herb butter)'),
+      I(1, 'tsp', 'lemon zest (herb butter)'),
+      I(1.5, 'lb', 'Brussels sprouts, trimmed and halved'),
+      I(1, 'lb', 'carrots, cut into 1/2-inch coins'),
+      I(2, 'tbsp', 'extra virgin olive oil (for the vegetables)'),
+      I(1, 'tsp', 'kosher salt (for the vegetables)'),
+      I(1/2, 'tsp', 'ground turmeric (for the vegetables)'),
+      I(1, 'tbsp', 'balsamic vinegar'),
+    ],
+    steps: [
+      S('Pat the steaks dry, season with salt and pepper, and let them sit at room temperature so they sear evenly.', 30),
+      S('Mash the butter with the parsley, rosemary, garlic, and lemon zest.'),
+      S('Toss the Brussels sprouts and carrots with olive oil, salt, and turmeric. Air fry at 390°F, shaking every 5 minutes, until browned and tender. Drizzle with the balsamic.', 18),
+      S('Heat a cast iron skillet over high heat with the oil. Sear the steaks on the first side without moving them.', 4),
+      S('Flip and cook to 130°F for medium-rare or 145°F for the USDA-recommended minimum, about 3 to 5 minutes for 1-inch steaks.', 4),
+      S('Rest the steaks with a spoonful of herb butter melting on top.', 10),
+      S('Slice against the grain and serve with the vegetables and the rest of the herb butter.'),
+    ],
+    mealPrep: 'Store the steak in larger pieces and slice it after reheating for the best texture. Pack it with the vegetables and keep extra herb butter in a small container. Refrigerate up to 4 days.',
+    reheat: 'Air fry the vegetables at 375°F for 4 to 5 minutes, shaking once. Air fry the steak separately at 350°F for 3 to 4 minutes so it does not dry out. USDA guidance is to reheat leftovers to 165°F, which will take the steak past medium-rare.',
+  },
+  {
+    id: 'mixed-berry-almond-crumble',
+    since: 2,
+    title: 'Mixed Berry Almond Crumble',
+    category: 'dessert',
+    baseServings: 6,
+    ingredients: [
+      I(5, 'cup', 'mixed berries, fresh or frozen (blueberries, raspberries, blackberries)'),
+      I(2, 'tbsp', 'honey or maple syrup'),
+      I(1, 'tbsp', 'arrowroot powder'),
+      I(1, 'tbsp', 'fresh lemon juice'),
+      I(1, 'tsp', 'lemon zest'),
+      I(1, 'cup', 'almond flour (topping)'),
+      I(1/2, 'cup', 'old-fashioned rolled oats (topping)'),
+      I(1/3, 'cup', 'walnuts or pecans, chopped (topping)'),
+      I(1, 'tsp', 'ground cinnamon (topping)'),
+      I(1/4, 'tsp', 'kosher salt (topping)'),
+      I(5, 'tbsp', 'butter, melted (topping)'),
+      I(3, 'tbsp', 'honey or maple syrup (topping)'),
+    ],
+    steps: [
+      S('Toss the berries with the honey, arrowroot, lemon juice, and zest and spread them in an 8-inch baking dish that fits your air fryer or oven.'),
+      S('Stir together the almond flour, oats, nuts, cinnamon, and salt. Add the melted butter and honey and mix until it forms clumps.'),
+      S('Scatter the topping over the berries.'),
+      S('Bake at 350°F (or air fry at 320°F) until the fruit bubbles at the edges and the top is golden. Cover loosely with foil if the top browns too fast. Frozen berries take about 10 minutes longer.', 30),
+      S('Let it cool so the filling thickens.', 15),
+      S('Serve warm, plain or with a spoonful of Greek yogurt.'),
+    ],
+    mealPrep: 'Cool completely, cover, and refrigerate up to 4 days. Portion it into small containers for an easy dessert all week.',
+    reheat: 'Air fry a portion in a small oven-safe dish at 320°F for 4 to 5 minutes, until warm and the topping crisps again.',
+  },
+  {
+    id: 'dark-chocolate-avocado-mousse',
+    since: 2,
+    title: 'Dark Chocolate Avocado Mousse',
+    category: 'dessert',
+    baseServings: 4,
+    ingredients: [
+      I(2, '', 'large ripe avocados'),
+      I(1/3, 'cup', 'unsweetened cocoa powder'),
+      I(1/4, 'cup', 'maple syrup or honey'),
+      I(1/4, 'cup', 'full-fat coconut milk or whole milk'),
+      I(2, 'oz', 'dark chocolate (70% or higher), melted'),
+      I(1, 'tsp', 'vanilla extract'),
+      I(1/8, 'tsp', 'kosher salt'),
+      I(1/2, 'cup', 'fresh raspberries (for serving)'),
+      I(2, 'tbsp', 'shaved dark chocolate or cacao nibs (for serving)'),
+    ],
+    steps: [
+      S('Melt the dark chocolate in short microwave bursts, stirring between each, and let it cool slightly.'),
+      S('Blend the avocado flesh, cocoa, maple syrup, milk, melted chocolate, vanilla, and salt in a food processor until completely smooth, scraping down the sides.'),
+      S('Taste and add a little more sweetener if you like. Spoon into 4 small jars or cups.'),
+      S('Chill until set.', 60),
+      S('Top with raspberries and shaved chocolate just before serving.'),
+    ],
+    mealPrep: 'Press plastic wrap onto the surface or use tight lids so it does not darken. Refrigerate up to 2 days; it tastes best within 24 hours.',
+    reheat: 'Serve cold. No reheating needed.',
+  },
+  {
+    id: 'golden-milk-chia-pudding',
+    since: 2,
+    title: 'Golden Milk Chia Pudding',
+    category: 'dessert',
+    baseServings: 4,
+    ingredients: [
+      I(2, 'cup', 'full-fat coconut milk or whole milk'),
+      I(1/2, 'cup', 'chia seeds'),
+      I(2, 'tbsp', 'honey or maple syrup'),
+      I(1, 'tsp', 'ground turmeric'),
+      I(1/2, 'tsp', 'ground ginger'),
+      I(1/2, 'tsp', 'ground cinnamon'),
+      I(1, 'pinch', 'black pepper'),
+      I(1, 'tsp', 'vanilla extract'),
+      I(1, 'cup', 'mango or pineapple, diced (for serving)'),
+      I(2, 'tbsp', 'unsweetened coconut flakes, toasted (for serving)'),
+    ],
+    steps: [
+      S('Whisk the milk, honey, turmeric, ginger, cinnamon, pepper, and vanilla until the spices dissolve.'),
+      S('Whisk in the chia seeds. Let it sit, then whisk again to break up any clumps.', 10),
+      S('Divide into 4 jars, cover, and refrigerate until thick, at least 4 hours or overnight.', 240),
+      S('Top with mango and toasted coconut before serving.'),
+    ],
+    mealPrep: 'Keeps covered in the fridge up to 4 days. Add the fruit and coconut the day you eat it.',
+    reheat: 'Serve cold. If you prefer it warm, microwave a jar for 30 to 45 seconds and stir. It does not go in the air fryer.',
+  },
+  {
+    id: 'cinnamon-baked-apples-walnuts',
+    since: 2,
+    title: 'Cinnamon Baked Apples with Walnuts',
+    category: 'dessert',
+    baseServings: 4,
+    ingredients: [
+      I(4, '', 'medium apples (Honeycrisp or Gala), halved and cored'),
+      I(2, 'tbsp', 'butter, melted'),
+      I(2, 'tbsp', 'maple syrup or honey'),
+      I(1.5, 'tsp', 'ground cinnamon'),
+      I(1/4, 'tsp', 'ground nutmeg'),
+      I(1/8, 'tsp', 'kosher salt'),
+      I(1/3, 'cup', 'walnuts, chopped'),
+      I(1/4, 'cup', 'old-fashioned rolled oats'),
+      I(1/2, 'cup', 'plain whole-milk Greek yogurt (for serving)'),
+    ],
+    steps: [
+      S('Stir together the melted butter, maple syrup, cinnamon, nutmeg, and salt. Mix half of it with the walnuts and oats.'),
+      S('Brush the cut sides of the apples with the rest of the butter mixture and set them cut side up in the air fryer basket.'),
+      S('Air fry at 350°F until the apples start to soften.', 8),
+      S('Spoon the walnut and oat mixture into the centers and air fry until the apples are tender and the topping is toasted.', 6),
+      S('Serve warm with a spoonful of Greek yogurt and any juices from the basket.'),
+    ],
+    mealPrep: 'Cool, cover, and refrigerate up to 4 days.',
+    reheat: 'Air fry at 320°F for 3 to 4 minutes until warm.',
+  },
+  {
+    id: 'greek-yogurt-berry-bark',
+    since: 2,
+    title: 'Greek Yogurt Berry Bark',
+    category: 'dessert',
+    baseServings: 6,
+    ingredients: [
+      I(2, 'cup', 'plain whole-milk Greek yogurt'),
+      I(2, 'tbsp', 'honey or maple syrup'),
+      I(1, 'tsp', 'vanilla extract'),
+      I(1, 'cup', 'mixed berries (blueberries, raspberries, sliced strawberries)'),
+      I(2, 'oz', 'dark chocolate (70% or higher), melted'),
+      I(2, 'tbsp', 'pistachios or almonds, chopped'),
+    ],
+    steps: [
+      S('Line a baking sheet with parchment paper.'),
+      S('Stir together the yogurt, honey, and vanilla, and spread it about 1/2 inch thick on the parchment.'),
+      S('Scatter the berries and nuts over the top and press them in lightly. Drizzle with the melted chocolate.'),
+      S('Freeze until completely firm.', 180),
+      S('Break into pieces and serve right away; it softens quickly at room temperature.'),
+    ],
+    mealPrep: 'Store the pieces in a freezer bag or container, separated with parchment, for up to 1 month.',
+    reheat: 'Serve straight from the freezer. Let a piece sit for 2 to 3 minutes if it is too hard to bite.',
+  },
 ];
 
 /* ---------- Icons ---------- */
@@ -852,9 +1306,9 @@ const ICONS = {
 
 /* ---------- Small helpers ---------- */
 
-const CATEGORIES = ['chicken', 'beef'];
+const CATEGORIES = ['chicken', 'beef', 'dessert'];
+const CATEGORY_LABELS = { chicken: 'Chicken', beef: 'Beef', dessert: 'Dessert' };
 const $ = (sel, root = document) => root.querySelector(sel);
-const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
 
 function esc(value) {
   return String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
@@ -1057,13 +1511,23 @@ const db = {
   getMeta: key => run('meta', 'readonly', tx => tx.objectStore('meta').get(key)),
 };
 
+// Each seed recipe belongs to a seed version ("since"). Installs only receive versions newer than
+// the one they already have, so starter recipes added later arrive without reviving deleted ones.
+const SEED_VERSION = Math.max(...SEED_RECIPES.map(r => r.since ?? 1));
+
 async function seedIfNeeded() {
-  if (await db.getMeta('seeded')) return;
-  const recipes = SEED_RECIPES.map(r => normalizeRecipe({ ...r, coverPhotoId: null, notes: '', versions: [], cookLog: [] }));
+  // Installs from before seed versions existed have "seeded" but no "seedVersion"; they hold version 1.
+  const current = (await db.getMeta('seedVersion')) ?? ((await db.getMeta('seeded')) ? 1 : 0);
+  if (current >= SEED_VERSION) return;
+  const existing = new Set(await run('recipes', 'readonly', tx => tx.objectStore('recipes').getAllKeys()));
+  const recipes = SEED_RECIPES
+    .filter(r => (r.since ?? 1) > current && !existing.has(r.id))
+    .map(r => normalizeRecipe({ ...r, coverPhotoId: null, notes: '', versions: [], cookLog: [] }));
   await run(['recipes', 'meta'], 'readwrite', tx => {
     const store = tx.objectStore('recipes');
     recipes.forEach(r => store.put(r));
     tx.objectStore('meta').put(true, 'seeded');
+    tx.objectStore('meta').put(SEED_VERSION, 'seedVersion');
   });
 }
 
@@ -1170,7 +1634,28 @@ function setCategory(category) {
 }
 
 // The starter recipes ship with a photo (see photos/CREDITS.md) that shows until the user picks their own cover.
-const STARTER_PHOTOS = new Set(SEED_RECIPES.map(r => r.id));
+const STARTER_PHOTOS = new Set([
+  'beef-bulgogi-bowl',
+  'burger-bowl-sweet-potato-fries',
+  'chicken-burrito-bowl',
+  'chicken-shawarma-bowl',
+  'chipotle-beef-fajita-bowl',
+  'chipotle-chicken-fajita-bowl',
+  'cinnamon-baked-apples-walnuts',
+  'dark-chocolate-avocado-mousse',
+  'ginger-garlic-chicken-stir-fry',
+  'golden-milk-chia-pudding',
+  'greek-beef-bowl',
+  'greek-yogurt-berry-bark',
+  'herb-steak-brussels-sprouts',
+  'honey-garlic-teriyaki-chicken',
+  'lemon-herb-chicken-sweet-potatoes',
+  'meatballs-mashed-potatoes-gravy',
+  'mixed-berry-almond-crumble',
+  'steak-bites-potato-hash',
+  'steak-sweet-potato-chimichurri',
+  'thai-basil-beef',
+]);
 const starterPhotoURL = id => (STARTER_PHOTOS.has(id) ? `photos/${encodeURIComponent(id)}.jpg` : null);
 
 function coverHTML(r, tileExtra = '') {
@@ -1187,8 +1672,8 @@ function renderGrid() {
     .sort((a, b) => a.title.localeCompare(b.title));
   grid.innerHTML = recipes.map(r => `
     <button type="button" class="card" data-id="${esc(r.id)}">
-      <div class="card-media">${coverHTML(r, r.title.length > 34 ? 'long' : '')}</div>
       <span class="card-name">${esc(r.title)}</span>
+      <div class="card-media">${coverHTML(r, r.title.length > 34 ? 'long' : '')}</div>
     </button>`).join('');
   const empty = $('#empty');
   empty.hidden = recipes.length > 0;
@@ -1506,7 +1991,7 @@ function fillEditForm(data, recipe) {
     <div class="field" id="coverField"></div>
     <label class="field"><span>Title</span><input id="fTitle" value="${esc(data.title)}" autocomplete="off"></label>
     <fieldset class="field"><legend>Category</legend>
-      <div class="seg">${CATEGORIES.map(c => `<label><input type="radio" name="category" value="${c}" ${data.category === c ? 'checked' : ''}><span>${cap(c)}</span></label>`).join('')}</div>
+      <div class="seg">${CATEGORIES.map(c => `<label><input type="radio" name="category" value="${c}" ${data.category === c ? 'checked' : ''}><span>${CATEGORY_LABELS[c]}</span></label>`).join('')}</div>
     </fieldset>
     <label class="field"><span>Base servings</span><input id="fServings" type="number" inputmode="numeric" min="1" step="1" value="${data.baseServings}"></label>
     <fieldset class="field"><legend>Ingredients</legend>
@@ -1968,6 +2453,7 @@ async function importBackup() {
       recipes.forEach(r => recipeStore.put(r));
       photos.forEach(p => photoStore.put(p));
       tx.objectStore('meta').put(true, 'seeded');
+      tx.objectStore('meta').put(SEED_VERSION, 'seedVersion');
     });
     forgetPhotoURLs();
     timers.clear();
